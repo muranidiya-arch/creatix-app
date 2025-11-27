@@ -30,7 +30,7 @@
     </style>
 </head>
 
-<body class="bg-slate-900 text-white font-sans antialiased min-h-screen">
+<body class="bg-slate-900 text-white font-sans antialiased min-h-screen flex flex-col">
 
     <!-- Cool Buffer (Loading Overlay) -->
     <div id="cool-buffer"
@@ -44,7 +44,7 @@
     </div>
 
     <!-- Login Section -->
-    <section id="login-section" class="flex items-center justify-center min-h-screen p-4">
+    <section id="login-section" class="flex items-center justify-center flex-1 p-4">
         <div class="w-full max-w-md bg-slate-800 rounded-2xl shadow-2xl p-8 border border-slate-700">
             <div class="text-center mb-8">
                 <h1 class="text-3xl font-bold text-blue-500 mb-2">CIMS</h1>
@@ -64,20 +64,23 @@
                         placeholder="Enter your password" required>
                 </div>
                 <button type="submit"
-                    class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition transform hover:scale-[1.02] active:scale-[0.98]">
-                    Sign In
-                </button>
+                    class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition transform hover:scale-[1.02] active:scale-[0.98]">Sign
+                    In</button>
             </form>
         </div>
     </section>
 
     <!-- Main Application (Hidden by default) -->
-    <main id="app-container" class="hidden min-h-screen flex flex-col">
+    <main id="app-container" class="hidden flex-1 flex flex-col">
         <!-- Navbar -->
         <nav class="bg-slate-800 border-b border-slate-700 px-4 py-3 flex justify-between items-center">
             <div class="font-bold text-xl text-blue-500">CIMS</div>
             <div class="flex items-center gap-4">
-                <span id="user-display" class="text-slate-300 text-sm hidden md:block"></span>
+                <div id="user-profile" class="flex items-center gap-3 hidden md:flex">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold"
+                        id="user-avatar">U</div>
+                    <span id="user-display" class="text-slate-300 text-sm"></span>
+                </div>
                 <button onclick="logout()" class="text-sm text-red-400 hover:text-red-300">Logout</button>
             </div>
         </nav>
@@ -101,8 +104,6 @@
                 </div>
 
                 <!-- Tab Contents -->
-
-                <!-- Staff Tab -->
                 <div id="boss-tab-staff" class="tab-content">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold">Staff Management</h3>
@@ -111,12 +112,10 @@
                             Staff</button>
                     </div>
                     <div id="staff-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
-                        <!-- Staff items injected here -->
                         <p class="text-slate-400 text-center">Loading staff data...</p>
                     </div>
                 </div>
 
-                <!-- Branches Tab -->
                 <div id="boss-tab-branches" class="tab-content hidden">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold">Branch Locations</h3>
@@ -129,7 +128,6 @@
                     </div>
                 </div>
 
-                <!-- Leads Tab -->
                 <div id="boss-tab-leads" class="tab-content hidden">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold">Lead Assignment</h3>
@@ -141,7 +139,6 @@
                         <select id="assign-counselor-select"
                             class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
                             <option value="">Select Counselor to Assign</option>
-                            <!-- Counselors injected here -->
                         </select>
                     </div>
                     <div id="lead-list" class="bg-slate-800 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">
@@ -149,19 +146,16 @@
                     </div>
                 </div>
 
-                <!-- Analytics Tab -->
                 <div id="boss-tab-analytics" class="tab-content hidden">
                     <div class="bg-slate-800 p-6 rounded-lg text-center">
                         <p class="text-slate-400">Analytics Module Coming Soon...</p>
                     </div>
                 </div>
-
-            </div> <!-- End Boss Dashboard -->
+            </div>
 
             <!-- Counselor Dashboard -->
             <div id="dashboard-counselor" class="dashboard-view hidden space-y-6">
                 <h2 class="text-2xl font-bold text-white mb-6">Counselor Dashboard</h2>
-
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <button onclick="openModal('add-lead-modal')"
                         class="p-4 bg-blue-600 rounded-lg hover:bg-blue-700 transition text-center font-bold">Add
@@ -173,11 +167,17 @@
                         class="p-4 bg-purple-600 rounded-lg hover:bg-purple-700 transition text-center font-bold">Mark
                         My Attendance</button>
                 </div>
-
                 <div>
                     <h3 class="text-xl font-semibold mb-4">My Leads</h3>
                     <div id="counselor-lead-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
                         <p class="text-slate-400 text-center">Loading leads...</p>
+                    </div>
+                </div>
+                <!-- My Attendance Section -->
+                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
+                    <h3 class="text-lg font-bold text-green-400 mb-2">My Attendance History</h3>
+                    <div id="attendance-log-counselor" class="space-y-2 max-h-40 overflow-y-auto">
+                        <p class="text-slate-500 text-sm">Loading...</p>
                     </div>
                 </div>
             </div>
@@ -185,17 +185,22 @@
             <!-- Faculty Dashboard -->
             <div id="dashboard-faculty" class="dashboard-view hidden space-y-6">
                 <h2 class="text-2xl font-bold text-white mb-6">Faculty Dashboard</h2>
-
                 <div class="mb-6">
                     <button onclick="startAttendance()"
                         class="w-full md:w-auto px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition font-bold">Mark
                         My Attendance</button>
                 </div>
-
                 <div>
                     <h3 class="text-xl font-semibold mb-4">My Students</h3>
                     <div id="faculty-student-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
                         <p class="text-slate-400 text-center">Loading students...</p>
+                    </div>
+                </div>
+                <!-- My Attendance Section -->
+                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
+                    <h3 class="text-lg font-bold text-green-400 mb-2">My Attendance History</h3>
+                    <div id="attendance-log-faculty" class="space-y-2 max-h-40 overflow-y-auto">
+                        <p class="text-slate-500 text-sm">Loading...</p>
                     </div>
                 </div>
             </div>
@@ -203,7 +208,6 @@
             <!-- Student Dashboard -->
             <div id="dashboard-student" class="dashboard-view hidden space-y-6">
                 <h2 class="text-2xl font-bold text-white mb-6">Student Dashboard</h2>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
                         <h3 class="text-lg font-bold text-blue-400 mb-2">Fee Status</h3>
@@ -223,7 +227,6 @@
     </main>
 
     <!-- Modals -->
-
     <!-- Add Staff Modal -->
     <div id="add-staff-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
         <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
@@ -312,6 +315,10 @@
                     class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
                 <input type="text" name="course" placeholder="Course" required
                     class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <select name="facultyId" id="student-faculty-select" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                    <option value="">Select Faculty</option>
+                </select>
                 <input type="number" name="totalFee" placeholder="Total Fee" required
                     class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
                 <input type="number" name="paidFee" placeholder="Initial Payment" required
@@ -342,9 +349,7 @@
                 <div class="flex gap-3">
                     <button id="btn-capture" onclick="captureAndSubmit()"
                         class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled>
-                        Capture & Submit
-                    </button>
+                        disabled>Capture & Submit</button>
                 </div>
             </div>
         </div>
@@ -436,9 +441,7 @@
             const password = document.getElementById('password').value;
 
             if (username && password) {
-                // Try login
                 const res = await callAPI('login', { username, password });
-
                 if (res.status === 'success') {
                     currentUser = res.user;
                     initDashboard();
@@ -452,11 +455,10 @@
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
             document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.role})`;
+            document.getElementById('user-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
 
-            // Hide all dashboards
             document.querySelectorAll('.dashboard-view').forEach(el => el.classList.add('hidden'));
 
-            // Show relevant dashboard
             const role = currentUser.role.toLowerCase();
             const dashId = `dashboard-${role}`;
             const dashEl = document.getElementById(dashId);
@@ -486,7 +488,6 @@
             modal.classList.remove('hidden');
 
             try {
-                // 1. Get Location
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
                         currentPosition = pos.coords;
@@ -499,7 +500,6 @@
                     }
                 );
 
-                // 2. Get Camera
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
                 video.srcObject = stream;
 
@@ -547,9 +547,16 @@
                 branchId: currentUser.branch
             };
 
-            const res = await callAPI('markAttendance', payload);
-            if (res.status === 'success') {
-                alert("Attendance Marked Successfully!");
+            try {
+                const res = await callAPI('markAttendance', payload);
+                if (res.status === 'success') {
+                    alert("Attendance Marked Successfully!");
+                    loadDashboardData();
+                } else {
+                    alert("Attendance Failed: " + res.message);
+                }
+            } catch (e) {
+                alert("Error submitting attendance: " + e.message);
             }
         }
 
@@ -594,7 +601,6 @@
 
         async function loadDashboardData() {
             if (!currentUser) return;
-
             const res = await callAPI('getDashboardData', { role: currentUser.role, userId: currentUser.id });
             if (res.status === 'success') {
                 renderDashboard(res.data);
@@ -605,8 +611,28 @@
             if (!data) return;
             const role = currentUser.role.toLowerCase();
 
+            // Common: Populate Faculty Dropdown
+            const facultySelect = document.getElementById('student-faculty-select');
+            if (facultySelect && data.facultyList) {
+                facultySelect.innerHTML = '<option value="">Select Faculty</option>' +
+                    data.facultyList.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+            }
+
+            // Common: Render My Attendance Log (for non-students)
+            if (role !== 'student') {
+                const attLogId = `attendance-log-${role}`;
+                const attLog = document.getElementById(attLogId);
+                if (attLog) {
+                    attLog.innerHTML = data.attendance?.map(a => `
+                        <div class="flex justify-between bg-slate-900 p-2 rounded border border-slate-700 text-sm">
+                            <span>${new Date(a.date).toLocaleDateString()}</span>
+                            <span class="${a.status === 'Present' ? 'text-green-400' : 'text-red-400'}">${a.status}</span>
+                        </div>
+                    `).join('') || '<p class="text-slate-500 text-sm">No attendance records.</p>';
+                }
+            }
+
             if (role === 'boss') {
-                // Staff
                 const staffList = document.getElementById('staff-list');
                 if (staffList) staffList.innerHTML = data.staff?.map(s => `
                     <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
@@ -617,7 +643,6 @@
                     </div>
                 `).join('') || '<p class="text-slate-500 text-center">No staff found.</p>';
 
-                // Branches
                 const branchList = document.getElementById('branch-list');
                 if (branchList) branchList.innerHTML = data.branches?.map(b => `
                     <div class="bg-slate-900 p-3 rounded border border-slate-700">
@@ -626,7 +651,6 @@
                     </div>
                 `).join('') || '<p class="text-slate-500 text-center">No branches found.</p>';
 
-                // Leads
                 const leadList = document.getElementById('lead-list');
                 if (leadList) leadList.innerHTML = data.leads?.map(l => `
                     <div class="flex items-center gap-3 bg-slate-900 p-3 rounded border border-slate-700">
@@ -638,7 +662,6 @@
                     </div>
                 `).join('') || '<p class="text-slate-500 text-center">No unassigned leads.</p>';
 
-                // Counselors Select
                 const counselorSelect = document.getElementById('assign-counselor-select');
                 if (counselorSelect && data.staff) {
                     const counselors = data.staff.filter(s => s.role === 'Counselor');
@@ -716,4 +739,3 @@
 </body>
 
 </html>
-
