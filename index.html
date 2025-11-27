@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creatix Institute Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Animations */
+        @keyframes spin-slow {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-spin-slow {
+            animation: spin-slow 3s linear infinite;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-white font-sans antialiased min-h-screen">
+
+    <!-- Cool Buffer (Loading Overlay) -->
+    <div id="cool-buffer"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4 mx-auto">
+            </div>
+            <p id="buffer-message" class="text-blue-400 text-lg font-semibold tracking-wider animate-pulse">Loading...
+            </p>
+        </div>
+    </div>
+
+    <!-- Login Section -->
+    <section id="login-section" class="flex items-center justify-center min-h-screen p-4">
+        <div class="w-full max-w-md bg-slate-800 rounded-2xl shadow-2xl p-8 border border-slate-700">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-blue-500 mb-2">CIMS</h1>
+                <p class="text-slate-400">Creatix Institute Management System</p>
+            </div>
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Username</label>
+                    <input type="text" id="username"
+                        class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-white"
+                        placeholder="Enter your username" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                    <input type="password" id="password"
+                        class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-white"
+                        placeholder="Enter your password" required>
+                </div>
+                <button type="submit"
+                    class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition transform hover:scale-[1.02] active:scale-[0.98]">
+                    Sign In
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Main Application (Hidden by default) -->
+    <main id="app-container" class="hidden min-h-screen flex flex-col">
+        <!-- Navbar -->
+        <nav class="bg-slate-800 border-b border-slate-700 px-4 py-3 flex justify-between items-center">
+            <div class="font-bold text-xl text-blue-500">CIMS</div>
+            <div class="flex items-center gap-4">
+                <span id="user-display" class="text-slate-300 text-sm hidden md:block"></span>
+                <button onclick="logout()" class="text-sm text-red-400 hover:text-red-300">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Dashboards Container -->
+        <div class="flex-1 p-4 md:p-6 overflow-y-auto">
+
+            <!-- Boss Dashboard -->
+            <div id="dashboard-boss" class="dashboard-view hidden space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-6">Boss Dashboard</h2>
+                <!-- Tabs -->
+                <div class="flex space-x-4 border-b border-slate-700 pb-2 mb-4 overflow-x-auto">
+                    <button onclick="showTab('boss', 'staff')"
+                        class="px-4 py-2 text-blue-400 border-b-2 border-blue-500 focus:outline-none">Staff</button>
+                    <button onclick="showTab('boss', 'branches')"
+                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none">Branches</button>
+                    <button onclick="showTab('boss', 'leads')"
+                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none">Leads</button>
+                    <button onclick="showTab('boss', 'analytics')"
+                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none">Analytics</button>
+                </div>
+
+                <!-- Tab Contents -->
+
+                <!-- Staff Tab -->
+                <div id="boss-tab-staff" class="tab-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">Staff Management</h3>
+                        <button onclick="openModal('add-staff-modal')"
+                            class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-bold transition">Add
+                            Staff</button>
+                    </div>
+                    <div id="staff-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
+                        <!-- Staff items injected here -->
+                        <p class="text-slate-400 text-center">Loading staff data...</p>
+                    </div>
+                </div>
+
+                <!-- Branches Tab -->
+                <div id="boss-tab-branches" class="tab-content hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">Branch Locations</h3>
+                        <button onclick="openModal('add-branch-modal')"
+                            class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-bold transition">Add
+                            Branch</button>
+                    </div>
+                    <div id="branch-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
+                        <p class="text-slate-400 text-center">Loading branch data...</p>
+                    </div>
+                </div>
+
+                <!-- Leads Tab -->
+                <div id="boss-tab-leads" class="tab-content hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">Lead Assignment</h3>
+                        <button onclick="assignSelectedLeads()"
+                            class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-bold transition">Assign
+                            Selected</button>
+                    </div>
+                    <div class="mb-4">
+                        <select id="assign-counselor-select"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                            <option value="">Select Counselor to Assign</option>
+                            <!-- Counselors injected here -->
+                        </select>
+                    </div>
+                    <div id="lead-list" class="bg-slate-800 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">
+                        <p class="text-slate-400 text-center">Loading leads...</p>
+                    </div>
+                </div>
+
+                <!-- Analytics Tab -->
+                <div id="boss-tab-analytics" class="tab-content hidden">
+                    <div class="bg-slate-800 p-6 rounded-lg text-center">
+                        <p class="text-slate-400">Analytics Module Coming Soon...</p>
+                    </div>
+                </div>
+
+            </div> <!-- End Boss Dashboard -->
+
+            <!-- Counselor Dashboard -->
+            <div id="dashboard-counselor" class="dashboard-view hidden space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-6">Counselor Dashboard</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <button onclick="openModal('add-lead-modal')"
+                        class="p-4 bg-blue-600 rounded-lg hover:bg-blue-700 transition text-center font-bold">Add
+                        Lead</button>
+                    <button onclick="openModal('add-student-modal')"
+                        class="p-4 bg-green-600 rounded-lg hover:bg-green-700 transition text-center font-bold">Enroll
+                        Student</button>
+                    <button onclick="startAttendance()"
+                        class="p-4 bg-purple-600 rounded-lg hover:bg-purple-700 transition text-center font-bold">Mark
+                        My Attendance</button>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">My Leads</h3>
+                    <div id="counselor-lead-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
+                        <p class="text-slate-400 text-center">Loading leads...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Faculty Dashboard -->
+            <div id="dashboard-faculty" class="dashboard-view hidden space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-6">Faculty Dashboard</h2>
+
+                <div class="mb-6">
+                    <button onclick="startAttendance()"
+                        class="w-full md:w-auto px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition font-bold">Mark
+                        My Attendance</button>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">My Students</h3>
+                    <div id="faculty-student-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
+                        <p class="text-slate-400 text-center">Loading students...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Dashboard -->
+            <div id="dashboard-student" class="dashboard-view hidden space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-6">Student Dashboard</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
+                        <h3 class="text-lg font-bold text-blue-400 mb-2">Fee Status</h3>
+                        <p class="text-3xl font-bold text-white">₹ <span id="student-fee-remaining">0</span></p>
+                        <p class="text-sm text-slate-400">Remaining Balance</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
+                        <h3 class="text-lg font-bold text-green-400 mb-2">Attendance</h3>
+                        <div id="student-attendance-log" class="space-y-2 max-h-40 overflow-y-auto">
+                            <p class="text-slate-500 text-sm">No records found.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modals -->
+
+    <!-- Add Staff Modal -->
+    <div id="add-staff-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Add New Staff</h3>
+                <button onclick="closeModal('add-staff-modal')" class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <form onsubmit="handleFormSubmit(event, 'addStaff')" class="space-y-4">
+                <input type="text" name="name" placeholder="Full Name" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="email" name="email" placeholder="Email" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <select name="role" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                    <option value="Counselor">Counselor</option>
+                    <option value="Faculty">Faculty</option>
+                    <option value="Boss">Boss</option>
+                </select>
+                <input type="text" name="branch" placeholder="Branch Name" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="text" name="username" placeholder="Username" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="password" name="password" placeholder="Password" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold">Create
+                    Staff</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Branch Modal -->
+    <div id="add-branch-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Add New Branch</h3>
+                <button onclick="closeModal('add-branch-modal')"
+                    class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <form onsubmit="handleFormSubmit(event, 'addBranch')" class="space-y-4">
+                <input type="text" name="name" placeholder="Branch Name" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="text" name="address" placeholder="Address" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="number" step="any" name="lat" placeholder="Latitude" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="number" step="any" name="lng" placeholder="Longitude" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold">Add
+                    Branch</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Lead Modal -->
+    <div id="add-lead-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Add New Lead</h3>
+                <button onclick="closeModal('add-lead-modal')" class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <form onsubmit="handleFormSubmit(event, 'addLead')" class="space-y-4">
+                <input type="text" name="name" placeholder="Lead Name" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="tel" name="phone" placeholder="Phone Number" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="text" name="course" placeholder="Interested Course" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold">Add
+                    Lead</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div id="add-student-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Enroll Student</h3>
+                <button onclick="closeModal('add-student-modal')"
+                    class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <form onsubmit="handleFormSubmit(event, 'addStudent')" class="space-y-4">
+                <input type="text" name="name" placeholder="Student Name" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="tel" name="phone" placeholder="Phone" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="text" name="course" placeholder="Course" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="number" name="totalFee" placeholder="Total Fee" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="number" name="paidFee" placeholder="Initial Payment" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="text" name="username" placeholder="Student Username" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="password" name="password" placeholder="Password" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 py-2 rounded font-bold">Enroll
+                    Student</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Attendance Modal (Shared) -->
+    <div id="attendance-modal"
+        class="fixed inset-0 z-40 bg-black/90 flex flex-col items-center justify-center hidden p-4">
+        <div class="w-full max-w-lg bg-slate-800 rounded-xl overflow-hidden shadow-2xl">
+            <div class="p-4 bg-slate-700 flex justify-between items-center">
+                <h3 class="font-bold text-white">Mark Attendance</h3>
+                <button onclick="closeAttendance()" class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <div class="p-4 relative">
+                <video id="camera-feed" autoplay playsinline
+                    class="w-full bg-black rounded-lg aspect-video mb-4"></video>
+                <canvas id="camera-canvas" class="hidden"></canvas>
+                <div id="location-status" class="text-center text-sm text-slate-400 mb-4">Waiting for location...</div>
+                <div class="flex gap-3">
+                    <button id="btn-capture" onclick="captureAndSubmit()"
+                        class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>
+                        Capture & Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- State ---
+        let currentUser = null;
+        let currentPosition = null;
+
+        // --- Configuration ---
+        // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL FOR LOCAL TESTING
+        const WEB_APP_URL = "";
+
+        // --- Core Functions ---
+
+        function showBuffer(message = "Loading...") {
+            document.getElementById('buffer-message').innerText = message;
+            document.getElementById('cool-buffer').classList.remove('hidden');
+        }
+
+        function hideBuffer() {
+            document.getElementById('cool-buffer').classList.add('hidden');
+        }
+
+        async function callAPI(action, payload = {}) {
+            showBuffer(getActionMessage(action));
+            try {
+                // 1. Try Google Apps Script Native (Deployed Web App)
+                if (typeof google !== 'undefined' && google.script) {
+                    return new Promise((resolve, reject) => {
+                        google.script.run
+                            .withSuccessHandler(response => {
+                                hideBuffer();
+                                resolve(JSON.parse(response));
+                            })
+                            .withFailureHandler(error => {
+                                hideBuffer();
+                                alert("API Error: " + error);
+                                reject(error);
+                            })
+                            .doPost({ postData: { contents: JSON.stringify({ action, ...payload }) } });
+                    });
+                }
+                // 2. Try Fetch to Web App URL (Local Testing)
+                else if (WEB_APP_URL) {
+                    const response = await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action, ...payload })
+                    });
+                    const data = await response.json();
+                    hideBuffer();
+                    return data;
+                }
+                // 3. No Connection Available
+                else {
+                    hideBuffer();
+                    alert("CRITICAL ERROR: Database Not Connected!\n\nTo fix this:\n1. Deploy 'Code.gs' as a Web App.\n2. Paste the Web App URL into the 'WEB_APP_URL' variable in index.html (Line ~360).");
+                    throw new Error("Database not connected");
+                }
+            } catch (e) {
+                hideBuffer();
+                console.error(e);
+                return { status: 'error', message: e.message };
+            }
+        }
+
+        function getActionMessage(action) {
+            switch (action) {
+                case 'login': return "Authenticating User...";
+                case 'markAttendance': return "Verifying Location...";
+                case 'addStaff': return "Adding Staff...";
+                case 'addBranch': return "Adding Branch...";
+                case 'assignLeads': return "Assigning Leads...";
+                default: return "Processing...";
+            }
+        }
+
+        // --- Auth ---
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username && password) {
+                // Try login
+                const res = await callAPI('login', { username, password });
+
+                if (res.status === 'success') {
+                    currentUser = res.user;
+                    initDashboard();
+                } else {
+                    alert(res.message || 'Login Failed');
+                }
+            }
+        });
+
+        function initDashboard() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.role})`;
+
+            // Hide all dashboards
+            document.querySelectorAll('.dashboard-view').forEach(el => el.classList.add('hidden'));
+
+            // Show relevant dashboard
+            const role = currentUser.role.toLowerCase();
+            const dashId = `dashboard-${role}`;
+            const dashEl = document.getElementById(dashId);
+            if (dashEl) {
+                dashEl.classList.remove('hidden');
+                loadDashboardData();
+            } else {
+                alert("Dashboard not found for role: " + role);
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('app-container').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('login-form').reset();
+        }
+
+        // --- Attendance ---
+
+        async function startAttendance() {
+            showBuffer("Preparing camera and location access...");
+            const modal = document.getElementById('attendance-modal');
+            const video = document.getElementById('camera-feed');
+            const btn = document.getElementById('btn-capture');
+
+            modal.classList.remove('hidden');
+
+            try {
+                // 1. Get Location
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        currentPosition = pos.coords;
+                        document.getElementById('location-status').innerText = `Location Acquired: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+                        checkReady();
+                    },
+                    (err) => {
+                        document.getElementById('location-status').innerText = "Location Error: " + err.message;
+                        alert("Location access is required for attendance.");
+                    }
+                );
+
+                // 2. Get Camera
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                video.srcObject = stream;
+
+                function checkReady() {
+                    if (currentPosition && video.srcObject) {
+                        btn.disabled = false;
+                        hideBuffer();
+                    }
+                }
+
+            } catch (err) {
+                hideBuffer();
+                alert("Error accessing devices: " + err.message);
+                closeAttendance();
+            }
+        }
+
+        function closeAttendance() {
+            const modal = document.getElementById('attendance-modal');
+            const video = document.getElementById('camera-feed');
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+            modal.classList.add('hidden');
+        }
+
+        async function captureAndSubmit() {
+            if (!currentPosition) return;
+
+            const video = document.getElementById('camera-feed');
+            const canvas = document.getElementById('camera-canvas');
+            const context = canvas.getContext('2d');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            closeAttendance();
+
+            const payload = {
+                userId: currentUser.id,
+                role: currentUser.role,
+                lat: currentPosition.latitude,
+                lng: currentPosition.longitude,
+                branchId: currentUser.branch
+            };
+
+            const res = await callAPI('markAttendance', payload);
+            if (res.status === 'success') {
+                alert("Attendance Marked Successfully!");
+            }
+        }
+
+        // --- UI Helpers ---
+
+        function showTab(role, tabName) {
+            document.querySelectorAll(`#dashboard-${role} .tab-content`).forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`${role}-tab-${tabName}`);
+            if (target) target.classList.remove('hidden');
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // --- Forms & Data ---
+
+        async function handleFormSubmit(e, action) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+
+            if (action === 'addStudent') {
+                payload.counselorId = currentUser.id;
+            }
+
+            const res = await callAPI(action, payload);
+            if (res.status === 'success') {
+                alert(res.message || 'Success!');
+                form.reset();
+                closeModal(form.closest('.fixed').id);
+                loadDashboardData();
+            } else {
+                alert('Error: ' + res.message);
+            }
+        }
+
+        async function loadDashboardData() {
+            if (!currentUser) return;
+
+            const res = await callAPI('getDashboardData', { role: currentUser.role, userId: currentUser.id });
+            if (res.status === 'success') {
+                renderDashboard(res.data);
+            }
+        }
+
+        function renderDashboard(data) {
+            if (!data) return;
+            const role = currentUser.role.toLowerCase();
+
+            if (role === 'boss') {
+                // Staff
+                const staffList = document.getElementById('staff-list');
+                if (staffList) staffList.innerHTML = data.staff?.map(s => `
+                    <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
+                        <div>
+                            <p class="font-bold">${s.name}</p>
+                            <p class="text-xs text-slate-400">${s.role} | ${s.branch}</p>
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-center">No staff found.</p>';
+
+                // Branches
+                const branchList = document.getElementById('branch-list');
+                if (branchList) branchList.innerHTML = data.branches?.map(b => `
+                    <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                        <p class="font-bold">${b.name}</p>
+                        <p class="text-xs text-slate-400">${b.address}</p>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-center">No branches found.</p>';
+
+                // Leads
+                const leadList = document.getElementById('lead-list');
+                if (leadList) leadList.innerHTML = data.leads?.map(l => `
+                    <div class="flex items-center gap-3 bg-slate-900 p-3 rounded border border-slate-700">
+                        <input type="checkbox" class="lead-checkbox w-4 h-4" value="${l.id}">
+                        <div>
+                            <p class="font-bold">${l.name}</p>
+                            <p class="text-xs text-slate-400">${l.course} | ${l.phone}</p>
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-center">No unassigned leads.</p>';
+
+                // Counselors Select
+                const counselorSelect = document.getElementById('assign-counselor-select');
+                if (counselorSelect && data.staff) {
+                    const counselors = data.staff.filter(s => s.role === 'Counselor');
+                    counselorSelect.innerHTML = '<option value="">Select Counselor to Assign</option>' +
+                        counselors.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                }
+
+            } else if (role === 'counselor') {
+                const list = document.getElementById('counselor-lead-list');
+                if (list) list.innerHTML = data.myLeads?.map(l => `
+                    <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
+                        <div>
+                            <p class="font-bold">${l.name}</p>
+                            <p class="text-xs text-slate-400">${l.phone}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs px-2 py-1 rounded bg-blue-900 text-blue-200">${l.status}</span>
+                            ${l.status !== 'Converted' ? `<button onclick="alert('Convert feature coming soon')" class="text-xs bg-green-600 px-2 py-1 rounded">Convert</button>` : ''}
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-center">No leads assigned.</p>';
+
+            } else if (role === 'faculty') {
+                const list = document.getElementById('faculty-student-list');
+                if (list) list.innerHTML = data.myStudents?.map(s => `
+                    <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
+                        <div>
+                            <p class="font-bold">${s.name}</p>
+                            <p class="text-xs text-slate-400">${s.course}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="markStudent('${s.id}', 'Present')" class="text-xs bg-green-600 hover:bg-green-500 px-3 py-1 rounded">P</button>
+                            <button onclick="markStudent('${s.id}', 'Absent')" class="text-xs bg-red-600 hover:bg-red-500 px-3 py-1 rounded">A</button>
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-center">No students assigned.</p>';
+
+            } else if (role === 'student') {
+                const feeEl = document.getElementById('student-fee-remaining');
+                if (feeEl) feeEl.innerText = data.feeRemaining || 0;
+
+                const log = document.getElementById('student-attendance-log');
+                if (log) log.innerHTML = data.attendance?.map(a => `
+                    <div class="flex justify-between bg-slate-900 p-2 rounded border border-slate-700 text-sm">
+                        <span>${new Date(a.date).toLocaleDateString()}</span>
+                        <span class="${a.status === 'Present' ? 'text-green-400' : 'text-red-400'}">${a.status}</span>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-sm">No records found.</p>';
+            }
+        }
+
+        async function assignSelectedLeads() {
+            const checkboxes = document.querySelectorAll('.lead-checkbox:checked');
+            const leadIds = Array.from(checkboxes).map(cb => cb.value);
+            const counselorId = document.getElementById('assign-counselor-select').value;
+
+            if (leadIds.length === 0) return alert("Select at least one lead.");
+            if (!counselorId) return alert("Select a counselor.");
+
+            const res = await callAPI('assignLeads', { leadIds, counselorId });
+            if (res.status === 'success') {
+                alert(res.message || "Leads assigned successfully");
+                loadDashboardData();
+            }
+        }
+
+        async function markStudent(studentId, status) {
+            const res = await callAPI('markStudentAttendance', { studentId, status });
+            if (res.status === 'success') {
+                alert(`Marked ${status}`);
+            }
+        }
+
+    </script>
+</body>
+
+</html>
