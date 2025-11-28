@@ -24,10 +24,33 @@
 
         .glass {
             /* Adjusted for a better, deeper dark-mode glass effect */
-            background: rgba(45, 55, 72, 0.5); /* Slate-700 with transparency */
+            background: rgba(45, 55, 72, 0.5);
+            /* Slate-700 with transparency */
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(71, 85, 105, 0.3); /* Slate-600 with transparency */
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            /* Slate-600 with transparency */
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Custom scrollbar for deep dark-mode (optional but nice) */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+            /* slate-800 */
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            /* slate-600 */
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+            /* slate-500 */
         }
     </style>
 </head>
@@ -45,7 +68,8 @@
     </div>
 
     <section id="login-section" class="flex items-center justify-center flex-1 p-6 sm:p-4">
-        <div class="w-full max-w-md bg-slate-800 rounded-2xl glass shadow-2xl p-8 md:p-10 border border-slate-700 transition-all duration-300">
+        <div
+            class="w-full max-w-md bg-slate-800 rounded-2xl glass shadow-2xl p-8 md:p-10 border border-slate-700 transition-all duration-300">
             <div class="text-center mb-8">
                 <h1 class="text-5xl font-extrabold text-blue-500 mb-2 tracking-tighter">CIMS</h1>
                 <p class="text-slate-400 font-medium">Creatix Institute Management System</p>
@@ -72,7 +96,8 @@
     </section>
 
     <main id="app-container" class="hidden flex-1 flex flex-col">
-        <nav class="bg-slate-800 border-b border-slate-700 px-4 md:px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-10">
+        <nav
+            class="bg-slate-800 border-b border-slate-700 px-4 md:px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-10">
             <div class="font-extrabold text-2xl text-blue-500 tracking-wider">CIMS</div>
             <div class="flex items-center gap-4">
                 <button onclick="openModal('password-change-modal')"
@@ -106,10 +131,12 @@
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-semibold text-slate-200">Staff Management</h3>
                         <button onclick="openModal('add-staff-modal')"
-                            class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm font-bold transition transform hover:scale-[1.05]">➕ Add
+                            class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm font-bold transition transform hover:scale-[1.05]">➕
+                            Add
                             Staff</button>
                     </div>
-                    <div id="staff-list" class="bg-slate-800 rounded-xl p-4 md:p-6 space-y-3 border border-slate-700 shadow-xl">
+                    <div id="staff-list"
+                        class="bg-slate-800 rounded-xl p-4 md:p-6 space-y-3 border border-slate-700 shadow-xl">
                         <p class="text-slate-400 text-center">Loading staff data...</p>
                     </div>
                 </div>
@@ -118,10 +145,12 @@
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-semibold text-slate-200">Branch Locations</h3>
                         <button onclick="openModal('add-branch-modal')"
-                            class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm font-bold transition transform hover:scale-[1.05]">➕ Add
+                            class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm font-bold transition transform hover:scale-[1.05]">➕
+                            Add
                             Branch</button>
                     </div>
-                    <div id="branch-list" class="bg-slate-800 rounded-xl p-4 md:p-6 space-y-3 border border-slate-700 shadow-xl">
+                    <div id="branch-list"
+                        class="bg-slate-800 rounded-xl p-4 md:p-6 space-y-3 border border-slate-700 shadow-xl">
                         <p class="text-slate-400 text-center">Loading branch data...</p>
                     </div>
                 </div>
@@ -130,7 +159,8 @@
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-semibold text-slate-200">Lead Assignment</h3>
                         <button onclick="assignSelectedLeads()"
-                            class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold transition transform hover:scale-[1.05]">➡️ Assign
+                            class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold transition transform hover:scale-[1.05]">➡️
+                            Assign
                             Selected</button>
                     </div>
                     <div class="mb-4 flex flex-col md:flex-row gap-4">
@@ -139,7 +169,8 @@
                             <option value="">Select Counselor to Assign</option>
                         </select>
                     </div>
-                    <div id="lead-list" class="bg-slate-800 rounded-xl p-4 md:p-6 space-y-3 max-h-96 overflow-y-auto border border-slate-700 shadow-xl">
+                    <div id="lead-list"
+                        class="bg-slate-800 rounded-xl p-4 md:p-6 space-y-3 max-h-96 overflow-y-auto border border-slate-700 shadow-xl">
                         <p class="text-slate-400 text-center">Loading leads...</p>
                     </div>
                 </div>
@@ -153,7 +184,8 @@
             </div>
 
             <div id="dashboard-counselor" class="dashboard-view hidden space-y-8">
-                <h2 class="text-3xl font-bold text-white mb-6 border-b border-slate-700/50 pb-2">🗣️ Counselor Dashboard</h2>
+                <h2 class="text-3xl font-bold text-white mb-6 border-b border-slate-700/50 pb-2">🗣️ Counselor Dashboard
+                </h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <button onclick="openModal('add-lead-modal')"
                         class="p-4 bg-blue-600 rounded-xl hover:bg-blue-700 transition transform hover:scale-[1.03] text-center font-bold shadow-md shadow-blue-600/30">
@@ -171,7 +203,8 @@
 
                 <div>
                     <h3 class="text-xl font-semibold mb-4 text-slate-200">My Leads</h3>
-                    <div id="counselor-lead-list" class="bg-slate-800 rounded-xl p-4 md:p-6 space-y-3 border border-slate-700 shadow-xl">
+                    <div id="counselor-lead-list"
+                        class="bg-slate-800 rounded-xl p-4 md:p-6 space-y-3 border border-slate-700 shadow-xl">
                         <p class="text-slate-400 text-center">Loading leads...</p>
                     </div>
                 </div>
@@ -235,10 +268,12 @@
                     <div class="flex items-center gap-4 mb-4 p-3 bg-slate-800 rounded-xl border border-slate-700">
                         <input type="checkbox" id="select-all-students" onclick="toggleSelectAll(this.checked)"
                             class="w-5 h-5 form-checkbox text-blue-500 bg-slate-900 border-slate-600 rounded focus:ring-blue-500">
-                        <label for="select-all-students" class="text-slate-300 font-medium">Select All Students in My Batch</label>
+                        <label for="select-all-students" class="text-slate-300 font-medium">Select All Students in My
+                            Batch</label>
                     </div>
-                    <div id="faculty-student-list" class="bg-slate-800 rounded-xl p-4 md:p-6 space-y-3 border border-slate-700 shadow-xl max-h-96 overflow-y-auto">
-                        <p class="text-slate-400 text-center">Loading students...</p>
+                    <div id="faculty-student-list"
+                        class="bg-slate-800 rounded-xl p-4 md:p-6 space-y-3 border border-slate-700 shadow-xl max-h-96 overflow-y-auto">
+                        <p class="text-slate-500 text-center">No students assigned.</p>
                     </div>
                 </div>
                 <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
@@ -269,8 +304,10 @@
         </div>
     </main>
 
-    <div id="add-staff-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700 shadow-2xl transition-all duration-300">
+    <div id="add-staff-modal"
+        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div
+            class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700 shadow-2xl transition-all duration-300 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-slate-700/50 pb-3">
                 <h3 class="text-2xl font-bold text-slate-100">Add New Staff</h3>
                 <button onclick="closeModal('add-staff-modal')"
@@ -299,8 +336,10 @@
         </div>
     </div>
 
-    <div id="add-branch-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700 shadow-2xl transition-all duration-300">
+    <div id="add-branch-modal"
+        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div
+            class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700 shadow-2xl transition-all duration-300 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-slate-700/50 pb-3">
                 <h3 class="text-2xl font-bold text-slate-100">Add New Branch</h3>
                 <button onclick="closeModal('add-branch-modal')"
@@ -323,8 +362,10 @@
         </div>
     </div>
 
-    <div id="add-lead-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700 shadow-2xl transition-all duration-300">
+    <div id="add-lead-modal"
+        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div
+            class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700 shadow-2xl transition-all duration-300 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-slate-700/50 pb-3">
                 <h3 class="text-2xl font-bold text-slate-100">Add New Lead</h3>
                 <button onclick="closeModal('add-lead-modal')"
@@ -345,14 +386,17 @@
         </div>
     </div>
 
-    <div id="add-student-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-slate-800 rounded-xl w-full max-w-lg p-6 border border-slate-700 shadow-2xl transition-all duration-300">
+    <div id="add-student-modal"
+        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div
+            class="bg-slate-800 rounded-xl w-full max-w-lg p-6 border border-slate-700 shadow-2xl transition-all duration-300 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-slate-700/50 pb-3">
                 <h3 class="text-2xl font-bold text-slate-100">Enroll Student</h3>
                 <button onclick="closeModal('add-student-modal')"
                     class="text-slate-400 hover:text-white text-3xl transition-colors">&times;</button>
             </div>
-            <form onsubmit="handleFormSubmit(event, 'addStudent')" class="space-y-4 grid grid-cols-1 sm:grid-cols-2 gap-4" id="enroll-student-form">
+            <form onsubmit="handleFormSubmit(event, 'addStudent')" class="space-y-4 grid grid-cols-1 sm:grid-cols-2 gap-4"
+                id="enroll-student-form">
                 <input type="hidden" name="leadId" id="enroll-lead-id">
                 <input type="text" name="name" placeholder="Student Name" required
                     class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500 sm:col-span-2">
@@ -382,8 +426,10 @@
         </div>
     </div>
 
-    <div id="password-change-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700 shadow-2xl transition-all duration-300">
+    <div id="password-change-modal"
+        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div
+            class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700 shadow-2xl transition-all duration-300 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6 border-b border-slate-700/50 pb-3">
                 <h3 class="text-2xl font-bold text-slate-100">Change Password</h3>
                 <button onclick="closeModal('password-change-modal')"
@@ -404,7 +450,8 @@
 
     <div id="attendance-modal"
         class="fixed inset-0 z-40 bg-black/90 flex flex-col items-center justify-center hidden p-4 backdrop-blur-sm">
-        <div class="w-full max-w-4xl h-full max-h-[90vh] bg-slate-800 rounded-xl overflow-hidden shadow-2xl flex flex-col border border-slate-700">
+        <div
+            class="w-full max-w-4xl h-full max-h-[90vh] bg-slate-800 rounded-xl overflow-hidden shadow-2xl flex flex-col border border-slate-700">
             <div class="p-4 bg-slate-700 flex justify-between items-center shadow-lg">
                 <h3 class="font-bold text-white text-xl">External Attendance Portal</h3>
                 <button onclick="closeAttendance()"
@@ -563,13 +610,13 @@
         // NEW FUNCTION: To handle the 'internal redirect' requirement
         function startAttendance_internal() {
             if (!currentUser || currentUser.role === 'Student') return alert("This function is for staff only.");
-            
+
             const modal = document.getElementById('attendance-modal');
             const iframe = document.getElementById('attendance-iframe');
-            
+
             // Set the iframe source to the external URL
             iframe.src = EXTERNAL_ATTENDANCE_URL;
-            
+
             // Show the modal
             modal.classList.remove('hidden');
 
@@ -585,7 +632,7 @@
             // ... original Geo-location logic ...
         }
         */
-        
+
         function closeAttendance() {
             document.getElementById('attendance-modal').classList.add('hidden');
             document.getElementById('attendance-iframe').src = ''; // Clear iframe source
@@ -603,25 +650,31 @@
                 btn.classList.remove('text-blue-400', 'border-blue-500', 'border-b-2');
                 btn.classList.add('text-slate-400', 'hover:text-white');
             });
-            
+
             // Set active state on the clicked button
             const clickedButton = document.querySelector(`#dashboard-${role} button[onclick="showTab('${role}', '${tabName}')"]`);
-            if(clickedButton) {
+            if (clickedButton) {
                 clickedButton.classList.remove('text-slate-400', 'hover:text-white');
                 clickedButton.classList.add('text-blue-400', 'border-blue-500', 'border-b-2');
             }
-            
+
             document.querySelectorAll(`#dashboard-${role} .tab-content`).forEach(el => el.classList.add('hidden'));
             const target = document.getElementById(`${role}-tab-${tabName}`);
             if (target) target.classList.remove('hidden');
         }
 
+        // *** FIX IMPLEMENTED HERE ***
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
+            // Prevent body scrolling when a modal is open
+            document.body.classList.add('overflow-hidden');
         }
 
+        // *** FIX IMPLEMENTED HERE ***
         function closeModal(id) {
             document.getElementById(id).classList.add('hidden');
+            // Re-enable body scrolling when a modal is closed
+            document.body.classList.remove('overflow-hidden');
         }
 
         // --- Forms & Data ---
@@ -675,10 +728,10 @@
             document.querySelector('#add-student-modal input[name="name"]').value = lead.name;
             document.querySelector('#add-student-modal input[name="phone"]').value = lead.phone;
             document.querySelector('#add-student-modal input[name="course"]').value = lead.course;
-            
+
             alert(`Pre-filled enrollment form for ${lead.name}. Click 'Enroll Student' to finalize the conversion and remove the lead.`);
         }
-        
+
         // NEW: Password Change Handler
         async function handlePasswordChange(e) {
             e.preventDefault();
@@ -690,14 +743,14 @@
             if (newPassword !== confirmPassword) {
                 return alert("New password and confirmation do not match.");
             }
-            
+
             const payload = {
                 userId: currentUser.id,
                 newPassword: newPassword
             };
-            
+
             const res = await callAPI('changePassword', payload);
-            
+
             if (res.status === 'success') {
                 alert("Password updated successfully! Please log in with your new password.");
                 form.reset();
@@ -783,7 +836,7 @@
                 // Counselor logic (My Leads, All Students)
                 const list = document.getElementById('counselor-lead-list');
                 window.allLeads = data.myLeads; // Store leads globally for conversion logic
-                
+
                 if (list) list.innerHTML = data.myLeads?.map(l => `
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 p-3 rounded-lg border border-slate-700 hover:bg-slate-700/50 transition">
                         <div class="mb-2 sm:mb-0">
@@ -827,7 +880,7 @@
                         </div>
                     </div>
                 `).join('') || '<p class="text-slate-500 text-center">No students assigned.</p>';
-                
+
                 updateBatchButtons(); // Initialize button state
                 document.getElementById('select-all-students').checked = false; // Reset select all checkbox
 
@@ -887,7 +940,7 @@
             const studentIds = Array.from(checkboxes).map(cb => cb.value);
 
             if (studentIds.length === 0) return alert("Please select students to mark attendance.");
-            
+
             if (!confirm(`Are you sure you want to mark ${studentIds.length} student(s) as ${status}?`)) return;
 
             const res = await callAPI('markStudentAttendance', { studentIds, status });
@@ -910,7 +963,7 @@
                 // Check against data attributes for better reliability
                 const name = row.dataset.name.toLowerCase();
                 const username = row.dataset.username.toLowerCase();
-                
+
                 if (name.includes(filter) || username.includes(filter)) {
                     row.style.display = "";
                 } else {
