@@ -76,7 +76,7 @@
                 <button onclick="openModal('change-password-modal')"
                     class="text-sm bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded transition">Change
                     Password</button>
-                
+
                 <div id="user-profile" class="flex items-center gap-3 hidden md:flex">
                     <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold"
                         id="user-avatar">U</div>
@@ -179,7 +179,10 @@
                     <button onclick="openModal('add-student-modal')"
                         class="p-4 bg-green-600 rounded-lg hover:bg-green-700 transition text-center font-bold">Enroll
                         Student</button>
-                    <!-- Attendance button removed as requested -->
+                    <!-- NEW: Edit Fee Button -->
+                    <button onclick="openModal('edit-fee-modal')"
+                        class="p-4 bg-yellow-600 rounded-lg hover:bg-yellow-700 transition text-center font-bold">Edit
+                        Paid Fee</button>
                 </div>
                 <div>
                     <h3 class="text-xl font-semibold mb-4">My Leads</h3>
@@ -202,9 +205,9 @@
                                     <tr>
                                         <th class="px-4 py-3">Name</th>
                                         <th class="px-4 py-3">Course</th>
-                                        <th class="px-4 py-3">Username</th>
-                                        <th class="px-4 py-3">Password</th>
+                                        <th class="px-4 py-3">Fee Status</th>
                                         <th class="px-4 py-3">Faculty</th>
+                                        <th class="px-4 py-3">Actions</th> <!-- NEW COLUMN -->
                                     </tr>
                                 </thead>
                                 <tbody id="counselor-student-list" class="divide-y divide-slate-700">
@@ -217,7 +220,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Attendance History section removed as requested -->
             </div>
 
             <div id="dashboard-faculty" class="dashboard-view hidden space-y-6">
@@ -264,7 +266,41 @@
 
         </div>
     </main>
-    
+
+    <!-- NEW: Edit Fee Modal (Used by Counselor) -->
+    <div id="edit-fee-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-yellow-400">Update Student Fee</h3>
+                <button onclick="closeModal('edit-fee-modal')"
+                    class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <form onsubmit="handleFeeUpdate(event)" class="space-y-4">
+                <!-- Hidden input to store student ID -->
+                <input type="hidden" id="fee-student-id" name="studentId">
+
+                <!-- Display student info -->
+                <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                    <p class="text-sm font-bold text-white" id="fee-student-name">Student: N/A</p>
+                    <p class="text-xs text-slate-400">Total Fee: <span id="fee-total-amount">0</span></p>
+                    <p class="text-xs text-slate-400">Paid: <span id="fee-paid-amount">0</span></p>
+                    <p class="text-xs text-red-400">Remaining: <span id="fee-remaining-amount">0</span></p>
+                </div>
+
+                <label class="block text-sm font-medium text-slate-300">New Paid Amount (Full amount paid so far)</label>
+                <input type="number" step="1" min="0" id="fee-new-paid" name="newPaidFee"
+                    placeholder="Enter total paid amount" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+
+                <button type="submit"
+                    class="w-full bg-yellow-600 hover:bg-yellow-700 py-2 rounded font-bold transition">
+                    Update Fee Status
+                </button>
+            </form>
+        </div>
+    </div>
+
+
     <!-- NEW: Change Password Modal (Accessible by everyone) -->
     <div id="change-password-modal"
         class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
@@ -437,6 +473,8 @@
         // --- State ---
         let currentUser = null;
         let currentPosition = null;
+        // Global variables to store all student/fee data for lookup
+        window.allStudentsData = [];
 
         // --- Configuration ---
         // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL FOR LOCAL TESTING
@@ -477,7 +515,7 @@
                                 hideBuffer();
                                 // Use custom modal/alert replacement instead of native alert()
                                 console.error("API Error: ", error);
-                                alert("API Error: " + error); 
+                                alert("API Error: " + error);
                                 reject(error);
                             })
                             .doPost({ postData: { contents: JSON.stringify({ action, ...payload }) } });
@@ -520,6 +558,7 @@
                 case 'enrollAndConvertLead': return "Converting Lead and Enrolling Student...";
                 case 'markStudentAttendance': return "Marking Student Attendance...";
                 case 'changePassword': return "Updating Password..."; // NEW MESSAGE
+                case 'updateStudentFee': return "Updating Fee Status..."; // NEW MESSAGE
                 default: return "Processing...";
             }
         }
@@ -572,7 +611,7 @@
             document.getElementById('login-form').reset();
             currentPosition = null; // Clear position on logout
         }
-        
+
         // NEW FUNCTION: Handle Password Change
         async function handleChangePassword(e) {
             e.preventDefault();
@@ -650,7 +689,7 @@
                 alert("Location not acquired. Please try again.");
                 return;
             }
-            
+
             closeAttendance(); // Close modal immediately
 
             const payload = {
@@ -685,14 +724,14 @@
                 btn.classList.remove('border-blue-500', 'text-blue-400');
                 btn.classList.add('hover:text-white', 'text-slate-400');
             });
-            
+
             // Set active state on the clicked button
             const clickedButton = document.querySelector(`#dashboard-${role} button[onclick="showTab('${role}', '${tabName}')"]`);
-            if(clickedButton) {
+            if (clickedButton) {
                 clickedButton.classList.remove('hover:text-white', 'text-slate-400');
                 clickedButton.classList.add('border-b-2', 'border-blue-500', 'text-blue-400');
             }
-            
+
             document.querySelectorAll(`#dashboard-${role} .tab-content`).forEach(el => el.classList.add('hidden'));
             const target = document.getElementById(`${role}-tab-${tabName}`);
             if (target) target.classList.remove('hidden');
@@ -700,6 +739,15 @@
 
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
+            // If it's the edit-fee modal, clear previous data before opening
+            if (id === 'edit-fee-modal') {
+                document.getElementById('fee-student-id').value = '';
+                document.getElementById('fee-student-name').innerText = 'Student: Select a student first';
+                document.getElementById('fee-total-amount').innerText = formatCurrency(0);
+                document.getElementById('fee-paid-amount').innerText = formatCurrency(0);
+                document.getElementById('fee-remaining-amount').innerText = formatCurrency(0);
+                document.getElementById('fee-new-paid').value = '';
+            }
         }
 
         function closeModal(id) {
@@ -734,6 +782,59 @@
             }
         }
 
+        // NEW: Function to open the Edit Fee Modal and pre-fill data
+        function editFee(studentId) {
+            const student = window.allStudentsData.find(s => s.id === studentId);
+            if (!student) return alert("Student data not found.");
+
+            openModal('edit-fee-modal');
+
+            // Pre-fill the modal with current fee details
+            document.getElementById('fee-student-id').value = student.id;
+            document.getElementById('fee-student-name').innerText = `Student: ${student.name} (${student.course})`;
+            document.getElementById('fee-total-amount').innerText = formatCurrency(student.totalFee);
+            document.getElementById('fee-paid-amount').innerText = formatCurrency(student.paidFee);
+            document.getElementById('fee-remaining-amount').innerText = formatCurrency(student.feeRemaining);
+            document.getElementById('fee-new-paid').value = student.paidFee;
+
+            // Focus on the input for immediate editing
+            document.getElementById('fee-new-paid').focus();
+        }
+
+        // NEW: Function to handle the Fee Update submission
+        async function handleFeeUpdate(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('fee-student-id').value;
+            const newPaidFee = parseFloat(document.getElementById('fee-new-paid').value);
+            
+            if (!studentId) return alert("Student not selected.");
+            if (isNaN(newPaidFee) || newPaidFee < 0) return alert("Please enter a valid paid amount.");
+            
+            // Look up the student's total fee to validate the new paid amount
+            const student = window.allStudentsData.find(s => s.id === studentId);
+            if (!student) return alert("Student data missing during validation.");
+
+            if (newPaidFee > student.totalFee) {
+                return alert(`The new paid amount (${formatCurrency(newPaidFee)}) cannot exceed the total fee (${formatCurrency(student.totalFee)}).`);
+            }
+
+            const payload = {
+                studentId: studentId,
+                newPaidFee: newPaidFee
+            };
+
+            const res = await callAPI('updateStudentFee', payload);
+
+            if (res.status === 'success') {
+                alert(res.message || 'Fee status updated successfully!');
+                closeModal('edit-fee-modal');
+                document.querySelector('#edit-fee-modal form').reset();
+                loadDashboardData(); // Refresh the list
+            } else {
+                alert('Error updating fee: ' + res.message);
+            }
+        }
+
         // NEW: Convert Lead function (Kept logic simplified)
         function convertLead(leadId) {
             const lead = window.allLeads.find(l => l.id === leadId);
@@ -751,7 +852,7 @@
             document.querySelector('#add-student-modal input[name="name"]').value = lead.name;
             document.querySelector('#add-student-modal input[name="phone"]').value = lead.phone;
             document.querySelector('#add-student-modal input[name="course"]').value = lead.course;
-            
+
             // 3. Update the form submission logic for this specific case:
             const studentForm = document.querySelector('#add-student-modal form');
             studentForm.onsubmit = (e) => handleEnrollmentConversion(e, leadId);
@@ -798,7 +899,7 @@
                 renderDashboard(res.data);
             }
         }
-        
+
         // NEW FUNCTION: Populate Branch Dropdowns
         function populateBranchDropdowns(branchNames) {
             const staffBranchSelect = document.getElementById('staff-branch-select');
@@ -884,7 +985,7 @@
                     counselorSelect.innerHTML = '<option value="">Select Counselor to Assign</option>' +
                         counselors.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
                 }
-                
+
                 // NEW: Render Analytics Tab
                 renderAnalytics(data.analytics);
 
@@ -892,7 +993,7 @@
                 // Counselor logic (My Leads, All Students)
                 const list = document.getElementById('counselor-lead-list');
                 window.allLeads = data.myLeads; // Store leads globally for conversion logic
-                
+
                 if (list) list.innerHTML = data.myLeads?.map(l => `
                     <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
                         <div>
@@ -906,19 +1007,26 @@
                     </div>
                 `).join('') || '<p class="text-slate-500 text-center">No leads assigned.</p>';
 
-                // Render Student List
+                // Render Student List (UPDATED to include fee status and action button)
                 const studentList = document.getElementById('counselor-student-list');
-                if (studentList && data.allStudents) {
-                    window.allStudents = data.allStudents; // Store for filtering
-                    studentList.innerHTML = data.allStudents.map(s => {
+                if (studentList && data.allStudentsData) {
+                    // Store student data globally for the editFee function lookup
+                    window.allStudentsData = data.allStudentsData;
+                    studentList.innerHTML = data.allStudentsData.map(s => {
                         const facultyName = data.facultyList?.find(f => f.id === s.facultyId)?.name || 'Unassigned';
+                        const feeColor = s.feeRemaining > 0 ? 'text-red-400' : 'text-green-400';
                         return `
                         <tr class="hover:bg-slate-700/50 transition student-row" data-name="${s.name}" data-username="${s.username}">
                             <td class="px-4 py-3 font-medium text-white">${s.name}</td>
                             <td class="px-4 py-3">${s.course} (${s.branch})</td>
-                            <td class="px-4 py-3 font-mono text-blue-400">${s.username}</td>
-                            <td class="px-4 py-3 font-mono text-green-400">${s.password}</td>
+                            <td class="px-4 py-3 ${feeColor}">Rem: ${formatCurrency(s.feeRemaining)}</td>
                             <td class="px-4 py-3">${facultyName}</td>
+                            <td class="px-4 py-3">
+                                <button onclick="editFee('${s.id}')"
+                                    class="text-xs bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded transition">
+                                    Edit Fee
+                                </button>
+                            </td>
                         </tr>
                     `;
                     }).join('') || '<tr><td colspan="5" class="px-4 py-3 text-center">No students found.</td></tr>';
@@ -936,7 +1044,7 @@
                         </div>
                     </div>
                 `).join('') || '<p class="text-slate-500 text-center">No students assigned.</p>';
-                
+
                 updateBatchButtons(); // Initialize button state
                 document.getElementById('select-all-students').checked = false; // Reset select all checkbox
 
@@ -954,7 +1062,7 @@
                 `).join('') || '<p class="text-slate-500 text-sm">No records found.</p>';
             }
         }
-        
+
         // NEW FUNCTION: Render Boss Analytics
         function renderAnalytics(analyticsData) {
             if (!analyticsData) return;
@@ -1035,7 +1143,7 @@
             const studentIds = Array.from(checkboxes).map(cb => cb.value);
 
             if (studentIds.length === 0) return alert("Please select students to mark attendance.");
-            
+
             // Use custom modal/alert replacement instead of native confirm()
             if (!window.confirm(`Are you sure you want to mark ${studentIds.length} student(s) as ${status}?`)) return;
 
@@ -1061,7 +1169,7 @@
                 // Check against data attributes for better reliability
                 const name = row.dataset.name.toLowerCase();
                 const username = row.dataset.username.toLowerCase();
-                
+
                 if (name.includes(filter) || username.includes(filter)) {
                     row.style.display = "";
                 } else {
