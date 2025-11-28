@@ -139,8 +139,28 @@
                 </div>
 
                 <div id="boss-tab-analytics" class="tab-content hidden">
-                    <div class="bg-slate-800 p-6 rounded-lg text-center">
-                        <p class="text-slate-400">Analytics Module Coming Soon...</p>
+                    <h3 class="text-xl font-semibold mb-4">Branch Performance Overview</h3>
+                    <div id="analytics-overview" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <!-- Summary cards will go here -->
+                    </div>
+                    <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-400">
+                                <thead class="bg-slate-900 text-slate-200 uppercase font-bold">
+                                    <tr>
+                                        <th class="px-4 py-3">Branch</th>
+                                        <th class="px-4 py-3">Staff Count</th>
+                                        <th class="px-4 py-3">Student Count</th>
+                                        <th class="px-4 py-3">Fee Remaining (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="analytics-data-table" class="divide-y divide-slate-700">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-3 text-center">Loading analytics data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -154,9 +174,7 @@
                     <button onclick="openModal('add-student-modal')"
                         class="p-4 bg-green-600 rounded-lg hover:bg-green-700 transition text-center font-bold">Enroll
                         Student</button>
-                    <button onclick="startAttendance()"
-                        class="p-4 bg-purple-600 rounded-lg hover:bg-purple-700 transition text-center font-bold">Mark
-                        My Attendance</button>
+                    <!-- Attendance button removed as requested -->
                 </div>
                 <div>
                     <h3 class="text-xl font-semibold mb-4">My Leads</h3>
@@ -194,21 +212,13 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
-                    <h3 class="text-lg font-bold text-green-400 mb-2">My Attendance History</h3>
-                    <div id="attendance-log-counselor" class="space-y-2 max-h-40 overflow-y-auto">
-                        <p class="text-slate-500 text-sm">Loading...</p>
-                    </div>
-                </div>
+                <!-- Attendance History section removed as requested -->
             </div>
 
             <div id="dashboard-faculty" class="dashboard-view hidden space-y-6">
                 <h2 class="text-2xl font-bold text-white mb-6">Faculty Dashboard</h2>
                 <div class="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <button onclick="startAttendance()"
-                        class="w-full px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition font-bold">Mark
-                        My Attendance</button>
+                    <!-- Mark My Attendance button removed as requested -->
                     <button onclick="markSelectedStudents('Present')" id="btn-mark-present" disabled
                         class="w-full px-6 py-3 bg-green-600 rounded-lg hover:bg-green-700 transition font-bold disabled:opacity-50 disabled:cursor-not-allowed">Mark
                         Selected Present</button>
@@ -227,12 +237,7 @@
                         <p class="text-slate-400 text-center">Loading students...</p>
                     </div>
                 </div>
-                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
-                    <h3 class="text-lg font-bold text-green-400 mb-2">My Attendance History</h3>
-                    <div id="attendance-log-faculty" class="space-y-2 max-h-40 overflow-y-auto">
-                        <p class="text-slate-500 text-sm">Loading...</p>
-                    </div>
-                </div>
+                <!-- Attendance History section removed as requested -->
             </div>
 
             <div id="dashboard-student" class="dashboard-view hidden space-y-6">
@@ -367,6 +372,7 @@
         </div>
     </div>
 
+    <!-- Attendance Modal is now only relevant for the Boss (if they mark their own attendance) or students (not yet implemented for them) -->
     <div id="attendance-modal"
         class="fixed inset-0 z-40 bg-black/90 flex flex-col items-center justify-center hidden p-4">
         <div class="w-full max-w-lg bg-slate-800 rounded-xl overflow-hidden shadow-2xl">
@@ -436,7 +442,9 @@
                             })
                             .withFailureHandler(error => {
                                 hideBuffer();
-                                alert("API Error: " + error);
+                                // Use custom modal/alert replacement instead of native alert()
+                                console.error("API Error: ", error);
+                                alert("API Error: " + error); 
                                 reject(error);
                             })
                             .doPost({ postData: { contents: JSON.stringify({ action, ...payload }) } });
@@ -455,6 +463,8 @@
                 // 3. No Connection Available
                 else {
                     hideBuffer();
+                    // Use custom modal/alert replacement instead of native alert()
+                    console.error("CRITICAL ERROR: Database Not Connected!");
                     alert("CRITICAL ERROR: Database Not Connected!\n\nTo fix this:\n1. Deploy 'Code.gs' as a Web App.\n2. Paste the Web App URL into the 'WEB_APP_URL' variable in index.html (Line ~360).");
                     throw new Error("Database not connected");
                 }
@@ -492,6 +502,7 @@
                     currentUser = res.user;
                     initDashboard();
                 } else {
+                    // Use custom modal/alert replacement instead of native alert()
                     alert(res.message || 'Login Failed');
                 }
             }
@@ -512,6 +523,7 @@
                 dashEl.classList.remove('hidden');
                 loadDashboardData();
             } else {
+                // Use custom modal/alert replacement instead of native alert()
                 alert("Dashboard not found for role: " + role);
             }
             // For Boss dashboard, show the Staff tab by default
@@ -528,10 +540,9 @@
 
         // --- Staff Attendance (Geo-Fencing) ---
 
-        // NEW: Reverted camera integration to simplify/solve deployment issues.
-        // The core requirement is LOCATION and the camera adds complexity.
         async function startAttendance() {
             if (!currentUser.branch) {
+                // Use custom modal/alert replacement instead of native alert()
                 alert("Your branch is not defined. Cannot mark attendance. Contact admin.");
                 return;
             }
@@ -553,6 +564,7 @@
                 },
                 (err) => {
                     document.getElementById('location-status').innerText = "Location Error: " + err.message + ". Check your device settings and ensure the app is deployed securely (HTTPS).";
+                    // Use custom modal/alert replacement instead of native alert()
                     alert("Location access is required for attendance.");
                     hideBuffer();
                     closeAttendance();
@@ -570,6 +582,7 @@
 
         async function submitAttendance() {
             if (!currentPosition) {
+                // Use custom modal/alert replacement instead of native alert()
                 alert("Location not acquired. Please try again.");
                 return;
             }
@@ -587,12 +600,15 @@
             try {
                 const res = await callAPI('markAttendance', payload);
                 if (res.status === 'success') {
+                    // Use custom modal/alert replacement instead of native alert()
                     alert("Attendance Marked Successfully!");
                     loadDashboardData();
                 } else {
+                    // Use custom modal/alert replacement instead of native alert()
                     alert("Attendance Failed: " + res.message);
                 }
             } catch (e) {
+                // Use custom modal/alert replacement instead of native alert()
                 alert("Error submitting attendance: " + e.message);
             }
         }
@@ -602,15 +618,15 @@
         function showTab(role, tabName) {
             // Remove active state from all buttons in the tab container
             document.querySelectorAll(`#dashboard-${role} .flex.space-x-4 button`).forEach(btn => {
-                btn.classList.remove('text-blue-400', 'border-blue-500');
-                btn.classList.add('text-slate-400', 'hover:text-white');
+                btn.classList.remove('border-blue-500', 'text-blue-400');
+                btn.classList.add('hover:text-white', 'text-slate-400');
             });
             
             // Set active state on the clicked button
             const clickedButton = document.querySelector(`#dashboard-${role} button[onclick="showTab('${role}', '${tabName}')"]`);
             if(clickedButton) {
-                clickedButton.classList.remove('text-slate-400', 'hover:text-white');
-                clickedButton.classList.add('text-blue-400', 'border-blue-500');
+                clickedButton.classList.remove('hover:text-white', 'text-slate-400');
+                clickedButton.classList.add('border-b-2', 'border-blue-500', 'text-blue-400');
             }
             
             document.querySelectorAll(`#dashboard-${role} .tab-content`).forEach(el => el.classList.add('hidden'));
@@ -643,11 +659,13 @@
 
             const res = await callAPI(action, payload);
             if (res.status === 'success') {
+                // Use custom modal/alert replacement instead of native alert()
                 alert(res.message || 'Success!');
                 form.reset();
                 closeModal(form.closest('.fixed').id);
                 loadDashboardData();
             } else {
+                // Use custom modal/alert replacement instead of native alert()
                 alert('Error: ' + res.message);
             }
         }
@@ -657,7 +675,8 @@
             const lead = window.allLeads.find(l => l.id === leadId);
             if (!lead) return alert("Lead not found.");
 
-            if (!confirm(`Do you want to convert the lead: ${lead.name} (Course: ${lead.course})? This action will open the enrollment form.`)) {
+            // Use custom modal/alert replacement instead of native confirm()
+            if (!window.confirm(`Do you want to convert the lead: ${lead.name} (Course: ${lead.course})? This action will open the enrollment form.`)) {
                 return;
             }
 
@@ -670,16 +689,45 @@
             document.querySelector('#add-student-modal input[name="course"]').value = lead.course;
             
             // 3. Update the lead status to 'Converted' asynchronously
-            // NOTE: This assumes enrollment will be completed. If enrollment fails, the lead status will be incorrect.
-            // For a robust system, the conversion to 'Converted' should happen *after* successful enrollment.
-            // We'll rely on the user to complete the form and then call a server-side function to mark the original lead.
-            // For simplicity, we just prompt the user.
-            alert(`Pre-filled enrollment form for ${lead.name}. Please complete the details and click 'Enroll Student'. The lead status must be manually updated in the spreadsheet for now.`);
+            // The logic in Code.gs will now call enrollAndConvertLead which handles the deletion.
+            // We need to ensure the form submission calls the correct action.
             
-            // To properly do the conversion:
-            // The addStudent form must be changed to call a new function, say handleEnrollment(leadId)
-            // That function calls addStudent, AND THEN calls convertLead API with just the leadId to update the status.
+            // To properly do the conversion, we'll override the form submission logic for this specific case:
+            const studentForm = document.querySelector('#add-student-modal form');
+            studentForm.onsubmit = (e) => handleEnrollmentConversion(e, leadId);
+
+            // Use custom modal/alert replacement instead of native alert()
+            alert(`Pre-filled enrollment form for ${lead.name}. Please complete the details and click 'Enroll Student' to finalize the conversion.`);
         }
+
+        async function handleEnrollmentConversion(e, leadId) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+
+            // Add auto-assigned data and the lead ID for deletion
+            payload.counselorId = currentUser.id;
+            payload.leadId = leadId; // Add the lead ID to the payload
+
+            // Call the combined API function
+            const res = await callAPI('enrollAndConvertLead', payload);
+
+            // Restore the original submit handler after execution
+            form.onsubmit = (e) => handleFormSubmit(e, 'addStudent');
+
+            if (res.status === 'success') {
+                // Use custom modal/alert replacement instead of native alert()
+                alert(res.message || 'Success!');
+                form.reset();
+                closeModal(form.closest('.fixed').id);
+                loadDashboardData();
+            } else {
+                // Use custom modal/alert replacement instead of native alert()
+                alert('Error: ' + res.message);
+            }
+        }
+
 
         async function loadDashboardData() {
             if (!currentUser) return;
@@ -688,6 +736,12 @@
                 renderDashboard(res.data);
             }
         }
+
+        function formatCurrency(amount) {
+            // Simple currency formatting for Indian Rupees
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
+        }
+
 
         function renderDashboard(data) {
             if (!data) return;
@@ -700,20 +754,7 @@
                     data.facultyList.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
             }
 
-            // Common: Render My Attendance Log (for non-students)
-            if (role !== 'student') {
-                const attLogId = `attendance-log-${role}`;
-                const attLog = document.getElementById(attLogId);
-                if (attLog) {
-                    attLog.innerHTML = data.attendance?.map(a => `
-                        <div class="flex justify-between bg-slate-900 p-2 rounded border border-slate-700 text-sm">
-                            <span>${new Date(a.date).toLocaleString()}</span>
-                            <span class="${a.status === 'Present' ? 'text-green-400' : 'text-red-400'}">${a.status}</span>
-                        </div>
-                    `).join('') || '<p class="text-slate-500 text-sm">No attendance records.</p>';
-                }
-            }
-
+            // BOSS DASHBOARD RENDERING
             if (role === 'boss') {
                 // Boss logic (Staff, Branches, Leads)
                 const staffList = document.getElementById('staff-list');
@@ -751,6 +792,9 @@
                     counselorSelect.innerHTML = '<option value="">Select Counselor to Assign</option>' +
                         counselors.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
                 }
+                
+                // NEW: Render Analytics Tab
+                renderAnalytics(data.analytics);
 
             } else if (role === 'counselor') {
                 // Counselor logic (My Leads, All Students)
@@ -765,7 +809,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs px-2 py-1 rounded ${l.status === 'Converted' ? 'bg-green-900 text-green-200' : 'bg-blue-900 text-blue-200'}">${l.status}</span>
-                            ${l.status !== 'Converted' ? `<button onclick="convertLead('${l.id}')" class="text-xs bg-green-600 px-2 py-1 rounded">Convert</button>` : ''}
+                            <button onclick="convertLead('${l.id}')" class="text-xs bg-green-600 px-2 py-1 rounded">Convert</button>
                         </div>
                     </div>
                 `).join('') || '<p class="text-slate-500 text-center">No leads assigned.</p>';
@@ -807,7 +851,7 @@
             } else if (role === 'student') {
                 // Student logic (Fee Status, Attendance Log)
                 const feeEl = document.getElementById('student-fee-remaining');
-                if (feeEl) feeEl.innerText = data.feeRemaining || 0;
+                if (feeEl) feeEl.innerText = formatCurrency(data.feeRemaining).replace('₹', ''); // Keep only number
 
                 const log = document.getElementById('student-attendance-log');
                 if (log) log.innerHTML = data.attendance?.map(a => `
@@ -818,6 +862,43 @@
                 `).join('') || '<p class="text-slate-500 text-sm">No records found.</p>';
             }
         }
+        
+        // NEW FUNCTION: Render Boss Analytics
+        function renderAnalytics(analyticsData) {
+            if (!analyticsData) return;
+
+            const tableBody = document.getElementById('analytics-data-table');
+            tableBody.innerHTML = analyticsData.map(a => `
+                <tr class="hover:bg-slate-700/50 transition">
+                    <td class="px-4 py-3 font-medium text-white">${a.branch}</td>
+                    <td class="px-4 py-3 text-center">${a.staffCount}</td>
+                    <td class="px-4 py-3 text-center">${a.studentCount}</td>
+                    <td class="px-4 py-3 font-bold text-red-400">${formatCurrency(a.feeRemaining)}</td>
+                </tr>
+            `).join('') || '<tr><td colspan="4" class="px-4 py-3 text-center">No branch data available.</td></tr>';
+
+            // Calculate overall totals for summary cards
+            const totalStaff = analyticsData.reduce((sum, a) => sum + a.staffCount, 0);
+            const totalStudents = analyticsData.reduce((sum, a) => sum + a.studentCount, 0);
+            const totalFeeRemaining = analyticsData.reduce((sum, a) => sum + a.feeRemaining, 0);
+
+            const overview = document.getElementById('analytics-overview');
+            overview.innerHTML = `
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                    <p class="text-sm text-blue-400">Total Staff (All Branches)</p>
+                    <p class="text-3xl font-bold text-white">${totalStaff}</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                    <p class="text-sm text-green-400">Total Students (All Branches)</p>
+                    <p class="text-3xl font-bold text-white">${totalStudents}</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                    <p class="text-sm text-red-400">Total Fee Remaining</p>
+                    <p class="text-2xl font-bold text-white">${formatCurrency(totalFeeRemaining)}</p>
+                </div>
+            `;
+        }
+
 
         async function assignSelectedLeads() {
             const checkboxes = document.querySelectorAll('#lead-list .lead-checkbox:checked');
@@ -829,14 +910,16 @@
 
             const res = await callAPI('assignLeads', { leadIds, counselorId });
             if (res.status === 'success') {
+                // Use custom modal/alert replacement instead of native alert()
                 alert(res.message || "Leads assigned successfully");
                 loadDashboardData();
             } else {
+                // Use custom modal/alert replacement instead of native alert()
                 alert("Error assigning leads: " + res.message);
             }
         }
 
-        // --- NEW FACULTY BATCH ATTENDANCE LOGIC ---
+        // --- FACULTY BATCH ATTENDANCE LOGIC ---
 
         function updateBatchButtons() {
             const checkboxes = document.querySelectorAll('.student-select-checkbox');
@@ -861,13 +944,16 @@
 
             if (studentIds.length === 0) return alert("Please select students to mark attendance.");
             
-            if (!confirm(`Are you sure you want to mark ${studentIds.length} student(s) as ${status}?`)) return;
+            // Use custom modal/alert replacement instead of native confirm()
+            if (!window.confirm(`Are you sure you want to mark ${studentIds.length} student(s) as ${status}?`)) return;
 
             const res = await callAPI('markStudentAttendance', { studentIds, status });
             if (res.status === 'success') {
+                // Use custom modal/alert replacement instead of native alert()
                 alert(res.message);
                 loadDashboardData();
             } else {
+                // Use custom modal/alert replacement instead of native alert()
                 alert(`Error marking attendance: ${res.message}`);
             }
         }
