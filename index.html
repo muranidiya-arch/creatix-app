@@ -2,1074 +2,1078 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creatix Institute Management System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Custom Animations */
-        @keyframes spin-slow {
-            0% {
-                transform: rotate(0deg);
-            }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creatix Institute Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Animations */
+        @keyframes spin-slow {
+            0% {
+                transform: rotate(0deg);
+            }
 
-            100% {
-                transform: rotate(360deg);
-            }
-        }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
 
-        .animate-spin-slow {
-            animation: spin-slow 3s linear infinite;
-        }
+        .animate-spin-slow {
+            animation: spin-slow 3s linear infinite;
+        }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-    </style>
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
 </head>
 
 <body class="bg-slate-900 text-white font-sans antialiased min-h-screen flex flex-col">
 
-    <div id="cool-buffer"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
-        <div class="text-center">
-            <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4 mx-auto">
-            </div>
-            <p id="buffer-message" class="text-blue-400 text-lg font-semibold tracking-wider animate-pulse">Loading...
-            </p>
-        </div>
-    </div>
-
-    <section id="login-section" class="flex items-center justify-center flex-1 p-4">
-        <div class="w-full max-w-md bg-slate-800 rounded-2xl shadow-2xl p-8 border border-slate-700">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-blue-500 mb-2">CIMS</h1>
-                <p class="text-slate-400">Creatix Institute Management System</p>
-            </div>
-            <form id="login-form" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Username</label>
-                    <input type="text" id="username"
-                        class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-white"
-                        placeholder="Enter your username" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
-                    <input type="password" id="password"
-                        class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-white"
-                        placeholder="Enter your password" required>
-                </div>
-                <button type="submit"
-                    class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition transform hover:scale-[1.02] active:scale-[0.98]">Sign
-                    In</button>
-            </form>
-        </div>
-    </section>
-
-    <main id="app-container" class="hidden flex-1 flex flex-col">
-        <nav class="bg-slate-800 border-b border-slate-700 px-4 py-3 flex justify-between items-center">
-            <div class="font-bold text-xl text-blue-500">CIMS</div>
-            <div class="flex items-center gap-4">
-                <!-- NEW: Change Password Button -->
-                <button onclick="openModal('change-password-modal')"
-                    class="text-sm bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded transition">Change
-                    Password</button>
-                
-                <div id="user-profile" class="flex items-center gap-3 hidden md:flex">
-                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold"
-                        id="user-avatar">U</div>
-                    <span id="user-display" class="text-slate-300 text-sm"></span>
-                </div>
-                <button onclick="logout()" class="text-sm text-red-400 hover:text-red-300">Logout</button>
-            </div>
-        </nav>
-
-        <div class="flex-1 p-4 md:p-6 overflow-y-auto">
-
-            <div id="dashboard-boss" class="dashboard-view hidden space-y-6">
-                <h2 class="text-2xl font-bold text-white mb-6">Boss Dashboard</h2>
-                <div class="flex space-x-4 border-b border-slate-700 pb-2 mb-4 overflow-x-auto">
-                    <button onclick="showTab('boss', 'staff')"
-                        class="px-4 py-2 text-blue-400 border-b-2 border-blue-500 focus:outline-none">Staff</button>
-                    <button onclick="showTab('boss', 'branches')"
-                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none">Branches</button>
-                    <button onclick="showTab('boss', 'leads')"
-                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none">Leads</button>
-                    <button onclick="showTab('boss', 'analytics')"
-                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none">Analytics</button>
-                </div>
-
-                <div id="boss-tab-staff" class="tab-content">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold">Staff Management</h3>
-                        <button onclick="openModal('add-staff-modal')"
-                            class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-bold transition">Add
-                            Staff</button>
-                    </div>
-                    <div id="staff-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
-                        <p class="text-slate-400 text-center">Loading staff data...</p>
-                    </div>
-                </div>
-
-                <div id="boss-tab-branches" class="tab-content hidden">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold">Branch Locations</h3>
-                        <button onclick="openModal('add-branch-modal')"
-                            class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-bold transition">Add
-                            Branch</button>
-                    </div>
-                    <div id="branch-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
-                        <p class="text-slate-400 text-center">Loading branch data...</p>
-                    </div>
-                </div>
-
-                <div id="boss-tab-leads" class="tab-content hidden">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold">Lead Assignment</h3>
-                        <button onclick="assignSelectedLeads()"
-                            class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-bold transition">Assign
-                            Selected</button>
-                    </div>
-                    <div class="mb-4">
-                        <select id="assign-counselor-select"
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                            <option value="">Select Counselor to Assign</option>
-                        </select>
-                    </div>
-                    <div id="lead-list" class="bg-slate-800 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">
-                        <p class="text-slate-400 text-center">Loading leads...</p>
-                    </div>
-                </div>
-
-                <div id="boss-tab-analytics" class="tab-content hidden">
-                    <h3 class="text-xl font-semibold mb-4">Branch Performance Overview</h3>
-                    <div id="analytics-overview" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <!-- Summary cards will go here -->
-                    </div>
-                    <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm text-slate-400">
-                                <thead class="bg-slate-900 text-slate-200 uppercase font-bold">
-                                    <tr>
-                                        <th class="px-4 py-3">Branch</th>
-                                        <th class="px-4 py-3">Staff Count</th>
-                                        <th class="px-4 py-3">Student Count</th>
-                                        <th class="px-4 py-3">Fee Remaining (₹)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="analytics-data-table" class="divide-y divide-slate-700">
-                                    <tr>
-                                        <td colspan="4" class="px-4 py-3 text-center">Loading analytics data...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="dashboard-counselor" class="dashboard-view hidden space-y-6">
-                <h2 class="text-2xl font-bold text-white mb-6">Counselor Dashboard</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <button onclick="openModal('add-lead-modal')"
-                        class="p-4 bg-blue-600 rounded-lg hover:bg-blue-700 transition text-center font-bold">Add
-                        Lead</button>
-                    <button onclick="openModal('add-student-modal')"
-                        class="p-4 bg-green-600 rounded-lg hover:bg-green-700 transition text-center font-bold">Enroll
-                        Student</button>
-                    <!-- Attendance button removed as requested -->
-                </div>
-                <div>
-                    <h3 class="text-xl font-semibold mb-4">My Leads</h3>
-                    <div id="counselor-lead-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
-                        <p class="text-slate-400 text-center">Loading leads...</p>
-                    </div>
-                </div>
-
-                <div class="mt-8">
-                    <h3 class="text-xl font-semibold mb-4">Student Management</h3>
-                    <div class="mb-4">
-                        <input type="text" id="student-search" onkeyup="filterStudents()"
-                            placeholder="Search students by name..."
-                            class="w-full bg-slate-900 border border-slate-700 rounded px-4 py-2 text-white outline-none focus:border-blue-500">
-                    </div>
-                    <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm text-slate-400">
-                                <thead class="bg-slate-900 text-slate-200 uppercase font-bold">
-                                    <tr>
-                                        <th class="px-4 py-3">Name</th>
-                                        <th class="px-4 py-3">Course</th>
-                                        <th class="px-4 py-3">Username</th>
-                                        <th class="px-4 py-3">Password</th>
-                                        <th class="px-4 py-3">Faculty</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="counselor-student-list" class="divide-y divide-slate-700">
-                                    <tr>
-                                        <td colspan="5" class="px-4 py-3 text-center">Loading
-                                            students...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <!-- Attendance History section removed as requested -->
-            </div>
-
-            <div id="dashboard-faculty" class="dashboard-view hidden space-y-6">
-                <h2 class="text-2xl font-bold text-white mb-6">Faculty Dashboard</h2>
-                <div class="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Mark My Attendance button removed as requested -->
-                    <button onclick="markSelectedStudents('Present')" id="btn-mark-present" disabled
-                        class="w-full px-6 py-3 bg-green-600 rounded-lg hover:bg-green-700 transition font-bold disabled:opacity-50 disabled:cursor-not-allowed">Mark
-                        Selected Present</button>
-                    <button onclick="markSelectedStudents('Absent')" id="btn-mark-absent" disabled
-                        class="w-full px-6 py-3 bg-red-600 rounded-lg hover:bg-red-700 transition font-bold disabled:opacity-50 disabled:cursor-not-allowed">Mark
-                        Selected Absent</button>
-                </div>
-                <div>
-                    <h3 class="text-xl font-semibold mb-4">My Students</h3>
-                    <div class="flex items-center gap-4 mb-4">
-                        <input type="checkbox" id="select-all-students" onclick="toggleSelectAll(this.checked)"
-                            class="w-5 h-5">
-                        <label for="select-all-students" class="text-slate-300">Select All</label>
-                    </div>
-                    <div id="faculty-student-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
-                        <p class="text-slate-400 text-center">Loading students...</p>
-                    </div>
-                </div>
-                <!-- Attendance History section removed as requested -->
-            </div>
-
-            <div id="dashboard-student" class="dashboard-view hidden space-y-6">
-                <h2 class="text-2xl font-bold text-white mb-6">Student Dashboard</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
-                        <h3 class="text-lg font-bold text-blue-400 mb-2">Fee Status</h3>
-                        <p class="text-3xl font-bold text-white">₹ <span id="student-fee-remaining">0</span></p>
-                        <p class="text-sm text-slate-400">Remaining Balance</p>
-                    </div>
-                    <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
-                        <h3 class="text-lg font-bold text-green-400 mb-2">Attendance</h3>
-                        <div id="student-attendance-log" class="space-y-2 max-h-40 overflow-y-auto">
-                            <p class="text-slate-500 text-sm">No records found.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </main>
-    
-    <!-- NEW: Change Password Modal (Accessible by everyone) -->
-    <div id="change-password-modal"
-        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Change Password</h3>
-                <button onclick="closeModal('change-password-modal')"
-                    class="text-slate-400 hover:text-white">&times;</button>
-            </div>
-            <form onsubmit="handleChangePassword(event)" class="space-y-4">
-                <input type="password" id="new-password" placeholder="New Password" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <input type="password" id="confirm-password" placeholder="Confirm New Password" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <button type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold">Update
-                    Password</button>
-            </form>
-        </div>
-    </div>
-
-
-    <!-- UPDATED: Add Staff Modal (Branch dropdown) -->
-    <div id="add-staff-modal"
-        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Add New Staff</h3>
-                <button onclick="closeModal('add-staff-modal')"
-                    class="text-slate-400 hover:text-white">&times;</button>
-            </div>
-            <form onsubmit="handleFormSubmit(event, 'addStaff')" class="space-y-4">
-                <input type="text" name="name" placeholder="Full Name" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <input type="email" name="email" placeholder="Email (Username)" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <select name="role" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                    <option value="Counselor">Counselor</option>
-                    <option value="Faculty">Faculty</option>
-                    <option value="Boss">Boss</option>
-                </select>
-                <select name="branch" id="staff-branch-select" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                    <option value="">Select Branch</option>
-                </select>
-                <input type="password" name="password" placeholder="Password" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <button type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold">Create
-                    Staff</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="add-branch-modal"
-        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Add New Branch</h3>
-                <button onclick="closeModal('add-branch-modal')"
-                    class="text-slate-400 hover:text-white">&times;</button>
-            </div>
-            <form onsubmit="handleFormSubmit(event, 'addBranch')" class="space-y-4">
-                <input type="text" name="name" placeholder="Branch Name" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <input type="text" name="address" placeholder="Address" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <input type="number" step="any" name="lat" placeholder="Latitude" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <input type="number" step="any" name="lng" placeholder="Longitude" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <button type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold">Add
-                    Branch</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="add-lead-modal"
-        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Add New Lead</h3>
-                <button onclick="closeModal('add-lead-modal')"
-                    class="text-slate-400 hover:text-white">&times;</button>
-            </div>
-            <form onsubmit="handleFormSubmit(event, 'addLead')" class="space-y-4">
-                <input type="text" name="name" placeholder="Lead Name" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <input type="tel" name="phone" placeholder="Phone Number" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <input type="text" name="course" placeholder="Interested Course" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <button type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold">Add
-                    Lead</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- UPDATED: Enroll Student Modal (Branch dropdown) -->
-    <div id="add-student-modal"
-        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Enroll Student</h3>
-                <button onclick="closeModal('add-student-modal')"
-                    class="text-slate-400 hover:text-white">&times;</button>
-            </div>
-            <form onsubmit="handleFormSubmit(event, 'addStudent')" class="space-y-4">
-                <input type="text" name="name" placeholder="Student Name" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <input type="tel" name="phone" placeholder="Phone" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <input type="text" name="course" placeholder="Course" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <select name="branch" id="student-branch-select" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                    <option value="">Select Branch</option>
-                </select>
-                <select name="facultyId" id="student-faculty-select" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                    <option value="">Select Faculty</option>
-                </select>
-                <input type="number" name="totalFee" placeholder="Total Fee" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <input type="number" name="paidFee" placeholder="Initial Payment" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <input type="text" name="username" placeholder="Student Username" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <input type="password" name="password" placeholder="Password" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                <button type="submit"
-                    class="w-full bg-green-600 hover:bg-green-700 py-2 rounded font-bold">Enroll
-                    Student</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Attendance Modal is now only relevant for the Boss (if they mark their own attendance) or students (not yet implemented for them) -->
-    <div id="attendance-modal"
-        class="fixed inset-0 z-40 bg-black/90 flex flex-col items-center justify-center hidden p-4">
-        <div class="w-full max-w-lg bg-slate-800 rounded-xl overflow-hidden shadow-2xl">
-            <div class="p-4 bg-slate-700 flex justify-between items-center">
-                <h3 class="font-bold text-white">Mark Attendance</h3>
-                <button onclick="closeAttendance()"
-                    class="text-slate-400 hover:text-white">&times;</button>
-            </div>
-            <div class="p-4 relative">
-                <div class="w-full bg-slate-900 rounded-lg aspect-video mb-4 flex items-center justify-center text-slate-500">
-                    Camera is disabled for stability in web app deployment.
-                </div>
-                <div id="location-status" class="text-center text-sm text-slate-400 mb-4">
-                    Waiting for location...</div>
-                <div class="flex gap-3">
-                    <button id="btn-capture" onclick="submitAttendance()"
-                        class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled>Submit Attendance</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <footer class="text-center p-4 text-slate-500 text-sm mt-auto">
-        Made with ❤️ by Tanush
-    </footer>
-
-    <script>
-        // --- State ---
-        let currentUser = null;
-        let currentPosition = null;
-
-        // --- Configuration ---
-        // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL FOR LOCAL TESTING
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwnRo9Kr08wSrphW-47eBY7GTPSzDIptOw1Pk5fmwdB7OOmlqDFW2Q1vcELYW2xwTuCFQ/exec";
-
-        // --- Core Functions ---
-
-        function showBuffer(message = "Loading...") {
-            document.getElementById('buffer-message').innerText = message;
-            document.getElementById('cool-buffer').classList.remove('hidden');
-        }
-
-        function hideBuffer() {
-            document.getElementById('cool-buffer').classList.add('hidden');
-        }
-
-        async function callAPI(action, payload = {}) {
-            showBuffer(getActionMessage(action));
-            try {
-                // 1. Try Google Apps Script Native (Deployed Web App)
-                if (typeof google !== 'undefined' && google.script) {
-                    return new Promise((resolve, reject) => {
-                        // Pass the entire payload as contents of postData for doPost
-                        google.script.run
-                            .withSuccessHandler(response => {
-                                hideBuffer();
-                                // IMPORTANT: Apps Script native response is already parsed (or can be treated as string).
-                                // But since Code.gs returns JSON string, we must parse it here.
-                                // If the return type were set to CONTENT, the parsing would be different.
-                                // Stick to the original for consistency.
-                                try {
-                                    resolve(JSON.parse(response));
-                                } catch (e) {
-                                    resolve(response);
-                                }
-                            })
-                            .withFailureHandler(error => {
-                                hideBuffer();
-                                // Use custom modal/alert replacement instead of native alert()
-                                console.error("API Error: ", error);
-                                alert("API Error: " + error); 
-                                reject(error);
-                            })
-                            .doPost({ postData: { contents: JSON.stringify({ action, ...payload }) } });
-                    });
-                }
-                // 2. Try Fetch to Web App URL (Local Testing)
-                else if (WEB_APP_URL) {
-                    const response = await fetch(WEB_APP_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ action, ...payload })
-                    });
-                    const data = await response.json();
-                    hideBuffer();
-                    return data;
-                }
-                // 3. No Connection Available
-                else {
-                    hideBuffer();
-                    // Use custom modal/alert replacement instead of native alert()
-                    console.error("CRITICAL ERROR: Database Not Connected!");
-                    alert("CRITICAL ERROR: Database Not Connected!\n\nTo fix this:\n1. Deploy 'Code.gs' as a Web App.\n2. Paste the Web App URL into the 'WEB_APP_URL' variable in index.html (Line ~360).");
-                    throw new Error("Database not connected");
-                }
-            } catch (e) {
-                hideBuffer();
-                console.error(e);
-                return { status: 'error', message: e.message };
-            }
-        }
-
-        function getActionMessage(action) {
-            switch (action) {
-                case 'login': return "Authenticating User...";
-                case 'markAttendance': return "Verifying Location...";
-                case 'addStaff': return "Adding Staff...";
-                case 'addBranch': return "Adding Branch...";
-                case 'assignLeads': return "Assigning Leads...";
-                case 'addLead': return "Adding Lead...";
-                case 'addStudent': return "Enrolling Student...";
-                case 'enrollAndConvertLead': return "Converting Lead and Enrolling Student...";
-                case 'markStudentAttendance': return "Marking Student Attendance...";
-                case 'changePassword': return "Updating Password..."; // NEW MESSAGE
-                default: return "Processing...";
-            }
-        }
-
-        // --- Auth & User Management ---
-
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (username && password) {
-                const res = await callAPI('login', { username, password });
-                if (res.status === 'success') {
-                    currentUser = res.user;
-                    initDashboard();
-                } else {
-                    // Use custom modal/alert replacement instead of native alert()
-                    alert(res.message || 'Login Failed');
-                }
-            }
-        });
-
-        function initDashboard() {
-            document.getElementById('login-section').classList.add('hidden');
-            document.getElementById('app-container').classList.remove('hidden');
-            document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.role} - ${currentUser.branch})`;
-            document.getElementById('user-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
-
-            document.querySelectorAll('.dashboard-view').forEach(el => el.classList.add('hidden'));
-
-            const role = currentUser.role.toLowerCase();
-            const dashId = `dashboard-${role}`;
-            const dashEl = document.getElementById(dashId);
-            if (dashEl) {
-                dashEl.classList.remove('hidden');
-                loadDashboardData();
-            } else {
-                // Use custom modal/alert replacement instead of native alert()
-                alert("Dashboard not found for role: " + role);
-            }
-            // For Boss dashboard, show the Staff tab by default
-            if (role === 'boss') showTab('boss', 'staff');
-        }
-
-        function logout() {
-            currentUser = null;
-            document.getElementById('app-container').classList.add('hidden');
-            document.getElementById('login-section').classList.remove('hidden');
-            document.getElementById('login-form').reset();
-            currentPosition = null; // Clear position on logout
-        }
-        
-        // NEW FUNCTION: Handle Password Change
-        async function handleChangePassword(e) {
-            e.preventDefault();
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-
-            if (newPassword !== confirmPassword) {
-                return alert("New password and confirmation do not match.");
-            }
-            if (newPassword.length < 6) {
-                return alert("Password must be at least 6 characters long.");
-            }
-
-            const payload = {
-                userId: currentUser.id,
-                newPassword: newPassword
-            };
-
-            const res = await callAPI('changePassword', payload);
-            if (res.status === 'success') {
-                alert(res.message || 'Password updated successfully!');
-                document.getElementById('change-password-modal').classList.add('hidden');
-                document.querySelector('#change-password-modal form').reset();
-            } else {
-                alert('Error changing password: ' + res.message);
-            }
-        }
-
-
-        // --- Staff Attendance (Geo-Fencing) ---
-
-        async function startAttendance() {
-            if (!currentUser.branch) {
-                // Use custom modal/alert replacement instead of native alert()
-                alert("Your branch is not defined. Cannot mark attendance. Contact admin.");
-                return;
-            }
-
-            showBuffer("Requesting Geo-Location...");
-            const modal = document.getElementById('attendance-modal');
-            const btn = document.getElementById('btn-capture');
-            modal.classList.remove('hidden');
-            document.getElementById('location-status').innerText = "Waiting for location...";
-            document.getElementById('btn-capture').innerText = "Submit Attendance";
-
-            // Get location
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    currentPosition = pos.coords;
-                    document.getElementById('location-status').innerText = `Location Acquired: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
-                    document.getElementById('btn-capture').disabled = false;
-                    hideBuffer();
-                },
-                (err) => {
-                    document.getElementById('location-status').innerText = "Location Error: " + err.message + ". Check your device settings and ensure the app is deployed securely (HTTPS).";
-                    // Use custom modal/alert replacement instead of native alert()
-                    alert("Location access is required for attendance.");
-                    hideBuffer();
-                    closeAttendance();
-                },
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 } // Increased timeout
-            );
-        }
-
-        function closeAttendance() {
-            document.getElementById('attendance-modal').classList.add('hidden');
-            document.getElementById('btn-capture').disabled = true;
-            document.getElementById('location-status').innerText = "Waiting for location...";
-            currentPosition = null;
-        }
-
-        async function submitAttendance() {
-            if (!currentPosition) {
-                // Use custom modal/alert replacement instead of native alert()
-                alert("Location not acquired. Please try again.");
-                return;
-            }
-            
-            closeAttendance(); // Close modal immediately
-
-            const payload = {
-                userId: currentUser.id,
-                role: currentUser.role,
-                lat: currentPosition.latitude,
-                lng: currentPosition.longitude,
-                branch: currentUser.branch // Pass branch name for lookup
-            };
-
-            try {
-                const res = await callAPI('markAttendance', payload);
-                if (res.status === 'success') {
-                    // Use custom modal/alert replacement instead of native alert()
-                    alert("Attendance Marked Successfully!");
-                    loadDashboardData();
-                } else {
-                    // Use custom modal/alert replacement instead of native alert()
-                    alert("Attendance Failed: " + res.message);
-                }
-            } catch (e) {
-                // Use custom modal/alert replacement instead of native alert()
-                alert("Error submitting attendance: " + e.message);
-            }
-        }
-
-        // --- UI Helpers ---
-
-        function showTab(role, tabName) {
-            // Remove active state from all buttons in the tab container
-            document.querySelectorAll(`#dashboard-${role} .flex.space-x-4 button`).forEach(btn => {
-                btn.classList.remove('border-blue-500', 'text-blue-400');
-                btn.classList.add('hover:text-white', 'text-slate-400');
-            });
-            
-            // Set active state on the clicked button
-            const clickedButton = document.querySelector(`#dashboard-${role} button[onclick="showTab('${role}', '${tabName}')"]`);
-            if(clickedButton) {
-                clickedButton.classList.remove('hover:text-white', 'text-slate-400');
-                clickedButton.classList.add('border-b-2', 'border-blue-500', 'text-blue-400');
-            }
-            
-            document.querySelectorAll(`#dashboard-${role} .tab-content`).forEach(el => el.classList.add('hidden'));
-            const target = document.getElementById(`${role}-tab-${tabName}`);
-            if (target) target.classList.remove('hidden');
-        }
-
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        // --- Forms & Data ---
-
-        async function handleFormSubmit(e, action) {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-            const payload = Object.fromEntries(formData.entries());
-
-            // Add auto-assigned data
-            if (action === 'addStudent') {
-                payload.counselorId = currentUser.id;
-            } else if (action === 'addLead') {
-                payload.counselorId = currentUser.id; // Auto-assign to self
-            }
-
-            const res = await callAPI(action, payload);
-            if (res.status === 'success') {
-                // Use custom modal/alert replacement instead of native alert()
-                alert(res.message || 'Success!');
-                form.reset();
-                closeModal(form.closest('.fixed').id);
-                loadDashboardData();
-            } else {
-                // Use custom modal/alert replacement instead of native alert()
-                alert('Error: ' + res.message);
-            }
-        }
-
-        // NEW: Convert Lead function (Kept logic simplified)
-        function convertLead(leadId) {
-            const lead = window.allLeads.find(l => l.id === leadId);
-            if (!lead) return alert("Lead not found.");
-
-            // Use custom modal/alert replacement instead of native confirm()
-            if (!window.confirm(`Do you want to convert the lead: ${lead.name} (Course: ${lead.course})? This action will open the enrollment form.`)) {
-                return;
-            }
-
-            // 1. Open the student enrollment form and pre-fill details
-            openModal('add-student-modal');
-
-            // 2. Pre-fill the student enrollment form
-            document.querySelector('#add-student-modal input[name="name"]').value = lead.name;
-            document.querySelector('#add-student-modal input[name="phone"]').value = lead.phone;
-            document.querySelector('#add-student-modal input[name="course"]').value = lead.course;
-            
-            // 3. Update the form submission logic for this specific case:
-            const studentForm = document.querySelector('#add-student-modal form');
-            studentForm.onsubmit = (e) => handleEnrollmentConversion(e, leadId);
-
-            // Use custom modal/alert replacement instead of native alert()
-            alert(`Pre-filled enrollment form for ${lead.name}. Please complete the details and click 'Enroll Student' to finalize the conversion.`);
-        }
-
-        async function handleEnrollmentConversion(e, leadId) {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-            const payload = Object.fromEntries(formData.entries());
-
-            // Add auto-assigned data and the lead ID for deletion
-            payload.counselorId = currentUser.id;
-            payload.leadId = leadId; // Add the lead ID to the payload
-
-            // Call the combined API function
-            const res = await callAPI('enrollAndConvertLead', payload);
-
-            // Restore the original submit handler after execution
-            form.onsubmit = (e) => handleFormSubmit(e, 'addStudent');
-
-            if (res.status === 'success') {
-                // Use custom modal/alert replacement instead of native alert()
-                alert(res.message || 'Success!');
-                form.reset();
-                closeModal(form.closest('.fixed').id);
-                loadDashboardData();
-            } else {
-                // Use custom modal/alert replacement instead of native alert()
-                alert('Error: ' + res.message);
-            }
-        }
-
-
-        async function loadDashboardData() {
-            if (!currentUser) return;
-            const res = await callAPI('getDashboardData', { role: currentUser.role, userId: currentUser.id });
-            if (res.status === 'success') {
-                // Populate Branch Dropdowns before rendering the rest of the dashboard
-                populateBranchDropdowns(res.data.branchNames);
-                renderDashboard(res.data);
-            }
-        }
-        
-        // NEW FUNCTION: Populate Branch Dropdowns
-        function populateBranchDropdowns(branchNames) {
-            const staffBranchSelect = document.getElementById('staff-branch-select');
-            const studentBranchSelect = document.getElementById('student-branch-select');
-
-            const optionsHtml = ['<option value="">Select Branch</option>'];
-            if (branchNames) {
-                branchNames.forEach(name => {
-                    optionsHtml.push(`<option value="${name}">${name}</option>`);
-                });
-            }
-
-            const finalHtml = optionsHtml.join('');
-
-            if (staffBranchSelect) staffBranchSelect.innerHTML = finalHtml;
-            // The student form is often pre-filled, so ensure it doesn't overwrite if data exists
-            if (studentBranchSelect) {
-                // Only replace if no value is currently selected (e.g., during lead conversion)
-                if (!studentBranchSelect.value) {
-                    studentBranchSelect.innerHTML = finalHtml;
-                } else {
-                    // Update dropdown options while keeping the current selection
-                    const currentValue = studentBranchSelect.value;
-                    studentBranchSelect.innerHTML = finalHtml;
-                    studentBranchSelect.value = currentValue;
-                }
-            }
-        }
-
-
-        function formatCurrency(amount) {
-            // Simple currency formatting for Indian Rupees
-            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-        }
-
-
-        function renderDashboard(data) {
-            if (!data) return;
-            const role = currentUser.role.toLowerCase();
-
-            // Common: Populate Faculty Dropdown
-            const facultySelect = document.getElementById('student-faculty-select');
-            if (facultySelect && data.facultyList) {
-                facultySelect.innerHTML = '<option value="">Select Faculty</option>' +
-                    data.facultyList.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
-            }
-
-            // BOSS DASHBOARD RENDERING
-            if (role === 'boss') {
-                // Boss logic (Staff, Branches, Leads)
-                const staffList = document.getElementById('staff-list');
-                if (staffList) staffList.innerHTML = data.staff?.map(s => `
-                    <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
-                        <div>
-                            <p class="font-bold">${s.name}</p>
-                            <p class="text-xs text-slate-400">${s.role} | ${s.branch}</p>
-                        </div>
-                    </div>
-                `).join('') || '<p class="text-slate-500 text-center">No staff found.</p>';
-
-                const branchList = document.getElementById('branch-list');
-                if (branchList) branchList.innerHTML = data.branches?.map(b => `
-                    <div class="bg-slate-900 p-3 rounded border border-slate-700">
-                        <p class="font-bold">${b.name}</p>
-                        <p class="text-xs text-slate-400">${b.address}</p>
-                    </div>
-                `).join('') || '<p class="text-slate-500 text-center">No branches found.</p>';
-
-                const leadList = document.getElementById('lead-list');
-                if (leadList) leadList.innerHTML = data.leads?.map(l => `
-                    <div class="flex items-center gap-3 bg-slate-900 p-3 rounded border border-slate-700">
-                        <input type="checkbox" class="lead-checkbox w-4 h-4" value="${l.id}">
-                        <div>
-                            <p class="font-bold">${l.name}</p>
-                            <p class="text-xs text-slate-400">${l.course} | ${l.phone}</p>
-                        </div>
-                    </div>
-                `).join('') || '<p class="text-slate-500 text-center">No unassigned leads.</p>';
-
-                const counselorSelect = document.getElementById('assign-counselor-select');
-                if (counselorSelect && data.staff) {
-                    const counselors = data.staff.filter(s => s.role === 'Counselor');
-                    counselorSelect.innerHTML = '<option value="">Select Counselor to Assign</option>' +
-                        counselors.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-                }
-                
-                // NEW: Render Analytics Tab
-                renderAnalytics(data.analytics);
-
-            } else if (role === 'counselor') {
-                // Counselor logic (My Leads, All Students)
-                const list = document.getElementById('counselor-lead-list');
-                window.allLeads = data.myLeads; // Store leads globally for conversion logic
-                
-                if (list) list.innerHTML = data.myLeads?.map(l => `
-                    <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
-                        <div>
-                            <p class="font-bold">${l.name}</p>
-                            <p class="text-xs text-slate-400">${l.phone} (${l.course})</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs px-2 py-1 rounded ${l.status === 'Converted' ? 'bg-green-900 text-green-200' : 'bg-blue-900 text-blue-200'}">${l.status}</span>
-                            <button onclick="convertLead('${l.id}')" class="text-xs bg-green-600 px-2 py-1 rounded">Convert</button>
-                        </div>
-                    </div>
-                `).join('') || '<p class="text-slate-500 text-center">No leads assigned.</p>';
-
-                // Render Student List
-                const studentList = document.getElementById('counselor-student-list');
-                if (studentList && data.allStudents) {
-                    window.allStudents = data.allStudents; // Store for filtering
-                    studentList.innerHTML = data.allStudents.map(s => {
-                        const facultyName = data.facultyList?.find(f => f.id === s.facultyId)?.name || 'Unassigned';
-                        return `
-                        <tr class="hover:bg-slate-700/50 transition student-row" data-name="${s.name}" data-username="${s.username}">
-                            <td class="px-4 py-3 font-medium text-white">${s.name}</td>
-                            <td class="px-4 py-3">${s.course} (${s.branch})</td>
-                            <td class="px-4 py-3 font-mono text-blue-400">${s.username}</td>
-                            <td class="px-4 py-3 font-mono text-green-400">${s.password}</td>
-                            <td class="px-4 py-3">${facultyName}</td>
-                        </tr>
-                    `;
-                    }).join('') || '<tr><td colspan="5" class="px-4 py-3 text-center">No students found.</td></tr>';
-                }
-
-            } else if (role === 'faculty') {
-                // Faculty logic (My Students, Batch Attendance)
-                const list = document.getElementById('faculty-student-list');
-                if (list) list.innerHTML = data.myStudents?.map(s => `
-                    <div class="flex items-center gap-3 bg-slate-900 p-3 rounded border border-slate-700 faculty-student-row">
-                        <input type="checkbox" class="student-select-checkbox w-4 h-4" value="${s.id}" onchange="updateBatchButtons()">
-                        <div class="flex-1">
-                            <p class="font-bold">${s.name}</p>
-                            <p class="text-xs text-slate-400">${s.course} (${s.branch})</p>
-                        </div>
-                    </div>
-                `).join('') || '<p class="text-slate-500 text-center">No students assigned.</p>';
-                
-                updateBatchButtons(); // Initialize button state
-                document.getElementById('select-all-students').checked = false; // Reset select all checkbox
-
-            } else if (role === 'student') {
-                // Student logic (Fee Status, Attendance Log)
-                const feeEl = document.getElementById('student-fee-remaining');
-                if (feeEl) feeEl.innerText = formatCurrency(data.feeRemaining).replace('₹', ''); // Keep only number
-
-                const log = document.getElementById('student-attendance-log');
-                if (log) log.innerHTML = data.attendance?.map(a => `
-                    <div class="flex justify-between bg-slate-900 p-2 rounded border border-slate-700 text-sm">
-                        <span>${new Date(a.date).toLocaleDateString()}</span>
-                        <span class="${a.status === 'Present' ? 'text-green-400' : 'text-red-400'}">${a.status}</span>
-                    </div>
-                `).join('') || '<p class="text-slate-500 text-sm">No records found.</p>';
-            }
-        }
-        
-        // NEW FUNCTION: Render Boss Analytics
-        function renderAnalytics(analyticsData) {
-            if (!analyticsData) return;
-
-            const tableBody = document.getElementById('analytics-data-table');
-            tableBody.innerHTML = analyticsData.map(a => `
-                <tr class="hover:bg-slate-700/50 transition">
-                    <td class="px-4 py-3 font-medium text-white">${a.branch}</td>
-                    <td class="px-4 py-3 text-center">${a.staffCount}</td>
-                    <td class="px-4 py-3 text-center">${a.studentCount}</td>
-                    <td class="px-4 py-3 font-bold text-red-400">${formatCurrency(a.feeRemaining)}</td>
-                </tr>
-            `).join('') || '<tr><td colspan="4" class="px-4 py-3 text-center">No branch data available.</td></tr>';
-
-            // Calculate overall totals for summary cards
-            const totalStaff = analyticsData.reduce((sum, a) => sum + a.staffCount, 0);
-            const totalStudents = analyticsData.reduce((sum, a) => sum + a.studentCount, 0);
-            const totalFeeRemaining = analyticsData.reduce((sum, a) => sum + a.feeRemaining, 0);
-
-            const overview = document.getElementById('analytics-overview');
-            overview.innerHTML = `
-                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
-                    <p class="text-sm text-blue-400">Total Staff (All Branches)</p>
-                    <p class="text-3xl font-bold text-white">${totalStaff}</p>
-                </div>
-                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
-                    <p class="text-sm text-green-400">Total Students (All Branches)</p>
-                    <p class="text-3xl font-bold text-white">${totalStudents}</p>
-                </div>
-                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
-                    <p class="text-sm text-red-400">Total Fee Remaining</p>
-                    <p class="text-2xl font-bold text-white">${formatCurrency(totalFeeRemaining)}</p>
-                </div>
-            `;
-        }
-
-
-        async function assignSelectedLeads() {
-            const checkboxes = document.querySelectorAll('#lead-list .lead-checkbox:checked');
-            const leadIds = Array.from(checkboxes).map(cb => cb.value);
-            const counselorId = document.getElementById('assign-counselor-select').value;
-
-            if (leadIds.length === 0) return alert("Select at least one lead.");
-            if (!counselorId) return alert("Select a counselor.");
-
-            const res = await callAPI('assignLeads', { leadIds, counselorId });
-            if (res.status === 'success') {
-                // Use custom modal/alert replacement instead of native alert()
-                alert(res.message || "Leads assigned successfully");
-                loadDashboardData();
-            } else {
-                // Use custom modal/alert replacement instead of native alert()
-                alert("Error assigning leads: " + res.message);
-            }
-        }
-
-        // --- FACULTY BATCH ATTENDANCE LOGIC ---
-
-        function updateBatchButtons() {
-            const checkboxes = document.querySelectorAll('.student-select-checkbox');
-            const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-            const disable = selectedCount === 0;
-
-            document.getElementById('btn-mark-present').disabled = disable;
-            document.getElementById('btn-mark-absent').disabled = disable;
-        }
-
-        function toggleSelectAll(checked) {
-            const checkboxes = document.querySelectorAll('.student-select-checkbox');
-            checkboxes.forEach(cb => {
-                cb.checked = checked;
-            });
-            updateBatchButtons();
-        }
-
-        async function markSelectedStudents(status) {
-            const checkboxes = document.querySelectorAll('.student-select-checkbox:checked');
-            const studentIds = Array.from(checkboxes).map(cb => cb.value);
-
-            if (studentIds.length === 0) return alert("Please select students to mark attendance.");
-            
-            // Use custom modal/alert replacement instead of native confirm()
-            if (!window.confirm(`Are you sure you want to mark ${studentIds.length} student(s) as ${status}?`)) return;
-
-            const res = await callAPI('markStudentAttendance', { studentIds, status });
-            if (res.status === 'success') {
-                // Use custom modal/alert replacement instead of native alert()
-                alert(res.message);
-                loadDashboardData();
-            } else {
-                // Use custom modal/alert replacement instead of native alert()
-                alert(`Error marking attendance: ${res.message}`);
-            }
-        }
-
-        // --- Counselor Student Filtering ---
-
-        function filterStudents() {
-            const input = document.getElementById('student-search');
-            const filter = input.value.toLowerCase();
-            const rows = document.querySelectorAll('.student-row');
-
-            rows.forEach(row => {
-                // Check against data attributes for better reliability
-                const name = row.dataset.name.toLowerCase();
-                const username = row.dataset.username.toLowerCase();
-                
-                if (name.includes(filter) || username.includes(filter)) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-            });
-        }
-    </script>
+    <div id="cool-buffer"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4 mx-auto">
+            </div>
+            <p id="buffer-message" class="text-blue-400 text-lg font-semibold tracking-wider animate-pulse">Loading...
+            </p>
+        </div>
+    </div>
+
+    <section id="login-section" class="flex items-center justify-center flex-1 p-4">
+        <div class="w-full max-w-md bg-slate-800 rounded-2xl shadow-2xl p-8 border border-slate-700">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-blue-500 mb-2">CIMS</h1>
+                <p class="text-slate-400">Creatix Institute Management System</p>
+            </div>
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Username</label>
+                    <input type="text" id="username"
+                        class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-white"
+                        placeholder="Enter your username" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                    <input type="password" id="password"
+                        class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-white"
+                        placeholder="Enter your password" required>
+                </div>
+                <button type="submit"
+                    class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition transform hover:scale-[1.02] active:scale-[0.98]">Sign
+                    In</button>
+            </form>
+        </div>
+    </section>
+
+    <main id="app-container" class="hidden flex-1 flex flex-col">
+        <nav class="bg-slate-800 border-b border-slate-700 px-4 py-3 flex justify-between items-center">
+            <div class="font-bold text-xl text-blue-500">CIMS</div>
+            <div class="flex items-center gap-4">
+                                <button onclick="openModal('change-password-modal')"
+                    class="text-sm bg-slate-700 hover:bg-slate-600 text-white px-3 py-1 rounded transition">Change
+                    Password</button>
+                
+                <div id="user-profile" class="flex items-center gap-3 hidden md:flex">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold"
+                        id="user-avatar">U</div>
+                    <span id="user-display" class="text-slate-300 text-sm"></span>
+                </div>
+                <button onclick="logout()" class="text-sm text-red-400 hover:text-red-300">Logout</button>
+            </div>
+        </nav>
+
+        <div class="flex-1 p-4 md:p-6 overflow-y-auto">
+
+            <div id="dashboard-boss" class="dashboard-view hidden space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-6">Boss Dashboard</h2>
+                <div class="flex space-x-4 border-b border-slate-700 pb-2 mb-4 overflow-x-auto">
+                    <button onclick="showTab('boss', 'staff')"
+                        class="px-4 py-2 text-blue-400 border-b-2 border-blue-500 focus:outline-none">Staff</button>
+                    <button onclick="showTab('boss', 'branches')"
+                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none">Branches</button>
+                    <button onclick="showTab('boss', 'leads')"
+                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none">Leads</button>
+                    <button onclick="showTab('boss', 'analytics')"
+                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none">Analytics</button>
+                </div>
+
+                <div id="boss-tab-staff" class="tab-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">Staff Management</h3>
+                        <button onclick="openModal('add-staff-modal')"
+                            class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-bold transition">Add
+                            Staff</button>
+                    </div>
+                    <div id="staff-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
+                        <p class="text-slate-400 text-center">Loading staff data...</p>
+                    </div>
+                </div>
+
+                <div id="boss-tab-branches" class="tab-content hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">Branch Locations</h3>
+                        <button onclick="openModal('add-branch-modal')"
+                            class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-bold transition">Add
+                            Branch</button>
+                    </div>
+                    <div id="branch-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
+                        <p class="text-slate-400 text-center">Loading branch data...</p>
+                    </div>
+                </div>
+
+                <div id="boss-tab-leads" class="tab-content hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">Lead Assignment</h3>
+                        <button onclick="assignSelectedLeads()"
+                            class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-bold transition">Assign
+                            Selected</button>
+                    </div>
+                    <div class="mb-4">
+                        <select id="assign-counselor-select"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                            <option value="">Select Counselor to Assign</option>
+                        </select>
+                    </div>
+                    <div id="lead-list" class="bg-slate-800 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">
+                        <p class="text-slate-400 text-center">Loading leads...</p>
+                    </div>
+                </div>
+
+                <div id="boss-tab-analytics" class="tab-content hidden">
+                    <h3 class="text-xl font-semibold mb-4">Branch Performance Overview</h3>
+                    <div id="analytics-overview" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                            </div>
+                    <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-400">
+                                <thead class="bg-slate-900 text-slate-200 uppercase font-bold">
+                                    <tr>
+                                        <th class="px-4 py-3">Branch</th>
+                                        <th class="px-4 py-3">Staff Count</th>
+                                        <th class="px-4 py-3">Student Count</th>
+                                        <th class="px-4 py-3">Fee Remaining (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="analytics-data-table" class="divide-y divide-slate-700">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-3 text-center">Loading analytics data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <div id="dashboard-counselor" class="dashboard-view hidden space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-6">Counselor Dashboard  </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <button onclick="openModal('add-lead-modal')"
+                        class="p-4 bg-blue-600 rounded-lg hover:bg-blue-700 transition text-center font-bold">Add
+                        Lead</button>
+                    <button onclick="openModal('add-student-modal')"
+                        class="p-4 bg-green-600 rounded-lg hover:bg-green-700 transition text-center font-bold">Enroll
+                        Student</button>
+                                    </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">My Leads</h3>
+                    <div id="counselor-lead-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
+                        <p class="text-slate-400 text-center">Loading leads...</p>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <h3 class="text-xl font-semibold mb-4">Student Management</h3>
+                    <div class="mb-4">
+                        <input type="text" id="student-search" onkeyup="filterStudents()"
+                            placeholder="Search students by name..."
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-4 py-2 text-white outline-none focus:border-blue-500">
+                    </div>
+                    <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-400">
+                                <thead class="bg-slate-900 text-slate-200 uppercase font-bold">
+                                    <tr>
+                                        <th class="px-4 py-3">Name</th>
+                                        <th class="px-4 py-3">Course</th>
+                                        <th class="px-4 py-3">Username</th>
+                                        <th class="px-4 py-3">Password</th>
+                                        <th class="px-4 py-3">Faculty</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="counselor-student-list" class="divide-y divide-slate-700">
+                                    <tr>
+                                        <td colspan="5" class="px-4 py-3 text-center">Loading
+                                            students...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                            </div>
+
+            <div id="dashboard-faculty" class="dashboard-view hidden space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-6">Faculty Dashboard</h2>
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <button onclick="markSelectedStudents('Present')" id="btn-mark-present" disabled
+                        class="w-full px-6 py-3 bg-green-600 rounded-lg hover:bg-green-700 transition font-bold disabled:opacity-50 disabled:cursor-not-allowed">Mark
+                        Selected Present</button>
+                    <button onclick="markSelectedStudents('Absent')" id="btn-mark-absent" disabled
+                        class="w-full px-6 py-3 bg-red-600 rounded-lg hover:bg-red-700 transition font-bold disabled:opacity-50 disabled:cursor-not-allowed">Mark
+                        Selected Absent</button>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">My Students</h3>
+                    <div class="flex items-center gap-4 mb-4">
+                        <input type="checkbox" id="select-all-students" onclick="toggleSelectAll(this.checked)"
+                            class="w-5 h-5">
+                        <label for="select-all-students" class="text-slate-300">Select All</label>
+                    </div>
+                    <div id="faculty-student-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
+                        <p class="text-slate-400 text-center">Loading students...</p>
+                    </div>
+                </div>
+                            </div>
+
+            <div id="dashboard-student" class="dashboard-view hidden space-y-6">
+                <h2 class="text-2xl font-bold text-white mb-6">Student Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
+                        <h3 class="text-lg font-bold text-blue-400 mb-2">Fee Status</h3>
+                        <p class="text-3xl font-bold text-white">₹ <span id="student-fee-remaining">0</span></p>
+                        <p class="text-sm text-slate-400">Remaining Balance</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
+                        <h3 class="text-lg font-bold text-green-400 mb-2">Attendance</h3>
+                        <div id="student-attendance-log" class="space-y-2 max-h-40 overflow-y-auto">
+                            <p class="text-slate-500 text-sm">No records found.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+    
+        <div id="change-password-modal"
+        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Change Password</h3>
+                <button onclick="closeModal('change-password-modal')"
+                    class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <form onsubmit="handleChangePassword(event)" class="space-y-4">
+                <input type="password" id="new-password" placeholder="New Password" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="password" id="confirm-password" placeholder="Confirm New Password" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold">Update
+                    Password</button>
+            </form>
+        </div>
+    </div>
+
+
+        <div id="add-staff-modal"
+        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Add New Staff</h3>
+                <button onclick="closeModal('add-staff-modal')"
+                    class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <form onsubmit="handleFormSubmit(event, 'addStaff')" class="space-y-4">
+                <input type="text" name="name" placeholder="Full Name" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="email" name="email" placeholder="Email (Username)" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <select name="role" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                    <option value="Counselor">Counselor</option>
+                    <option value="Faculty">Faculty</option>
+                    <option value="Boss">Boss</option>
+                </select>
+                <select name="branch" id="staff-branch-select" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                    <option value="">Select Branch</option>
+                </select>
+                <input type="password" name="password" placeholder="Password" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold">Create
+                    Staff</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="add-branch-modal"
+        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Add New Branch</h3>
+                <button onclick="closeModal('add-branch-modal')"
+                    class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <form onsubmit="handleFormSubmit(event, 'addBranch')" class="space-y-4">
+                <input type="text" name="name" placeholder="Branch Name" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="text" name="address" placeholder="Address" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="number" step="any" name="lat" placeholder="Latitude" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="number" step="any" name="lng" placeholder="Longitude" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold">Add
+                    Branch</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="add-lead-modal"
+        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Add New Lead</h3>
+                <button onclick="closeModal('add-lead-modal')"
+                    class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <form onsubmit="handleFormSubmit(event, 'addLead')" class="space-y-4">
+                <input type="text" name="name" placeholder="Lead Name" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="tel" name="phone" placeholder="Phone Number" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="text" name="course" placeholder="Interested Course" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded font-bold">Add
+                    Lead</button>
+            </form>
+        </div>
+    </div>
+
+        <div id="add-student-modal"
+        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Enroll Student</h3>
+                <button onclick="closeModal('add-student-modal')"
+                    class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <form onsubmit="handleFormSubmit(event, 'addStudent')" class="space-y-4">
+                <input type="text" name="name" placeholder="Student Name" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="tel" name="phone" placeholder="Phone" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="text" name="course" placeholder="Course" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <select name="branch" id="student-branch-select" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                    <option value="">Select Branch</option>
+                </select>
+                <select name="facultyId" id="student-faculty-select" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                    <option value="">Select Faculty</option>
+                </select>
+                <input type="number" name="totalFee" placeholder="Total Fee" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="number" name="paidFee" placeholder="Initial Payment" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="text" name="username" placeholder="Student Username" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <input type="password" name="password" placeholder="Password" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                <button type="submit"
+                    class="w-full bg-green-600 hover:bg-green-700 py-2 rounded font-bold">Enroll
+                    Student</button>
+            </form>
+        </div>
+    </div>
+
+        <div id="attendance-modal"
+        class="fixed inset-0 z-40 bg-black/90 flex flex-col items-center justify-center hidden p-4">
+        <div class="w-full max-w-lg bg-slate-800 rounded-xl overflow-hidden shadow-2xl">
+            <div class="p-4 bg-slate-700 flex justify-between items-center">
+                <h3 class="font-bold text-white">Mark Attendance</h3>
+                <button onclick="closeAttendance()"
+                    class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <div class="p-4 relative">
+                <div class="w-full bg-slate-900 rounded-lg aspect-video mb-4 flex items-center justify-center text-slate-500">
+                    Camera is disabled for stability in web app deployment.
+                </div>
+                <div id="location-status" class="text-center text-sm text-slate-400 mb-4">
+                    Waiting for location...</div>
+                <div class="flex gap-3">
+                    <button id="btn-capture" onclick="submitAttendance()"
+                        class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>Submit Attendance</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center p-4 text-slate-500 text-sm mt-auto">
+        Made with ❤️ by Tanush
+    </footer>
+
+    <script>
+        // --- State ---
+        let currentUser = null;
+        let currentPosition = null;
+
+        // --- Configuration ---
+        // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL FOR LOCAL TESTING
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwnRo9Kr08wSrphW-47eBY7GTPSzDIptOw1Pk5fmwdB7OOmlqDFW2Q1vcELYW2xwTuCFQ/exec";
+
+        // --- Core Functions ---
+
+        function showBuffer(message = "Loading...") {
+            document.getElementById('buffer-message').innerText = message;
+            document.getElementById('cool-buffer').classList.remove('hidden');
+        }
+
+        function hideBuffer() {
+            document.getElementById('cool-buffer').classList.add('hidden');
+        }
+
+        async function callAPI(action, payload = {}) {
+            showBuffer(getActionMessage(action));
+            try {
+                // 1. Try Google Apps Script Native (Deployed Web App)
+                if (typeof google !== 'undefined' && google.script) {
+                    return new Promise((resolve, reject) => {
+                        // Pass the entire payload as contents of postData for doPost
+                        google.script.run
+                            .withSuccessHandler(response => {
+                                hideBuffer();
+                                // IMPORTANT: Apps Script native response is already parsed (or can be treated as string).
+                                // But since Code.gs returns JSON string, we must parse it here.
+                                // If the return type were set to CONTENT, the parsing would be different.
+                                // Stick to the original for consistency.
+                                try {
+                                    resolve(JSON.parse(response));
+                                } catch (e) {
+                                    resolve(response);
+                                }
+                            })
+                            .withFailureHandler(error => {
+                                hideBuffer();
+                                // Use custom modal/alert replacement instead of native alert()
+                                console.error("API Error: ", error);
+                                alert("API Error: " + error); 
+                                reject(error);
+                            })
+                            .doPost({ postData: { contents: JSON.stringify({ action, ...payload }) } });
+                    });
+                }
+                // 2. Try Fetch to Web App URL (Local Testing)
+                else if (WEB_APP_URL) {
+                    const response = await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action, ...payload })
+                    });
+                    const data = await response.json();
+                    hideBuffer();
+                    return data;
+                }
+                // 3. No Connection Available
+                else {
+                    hideBuffer();
+                    // Use custom modal/alert replacement instead of native alert()
+                    console.error("CRITICAL ERROR: Database Not Connected!");
+                    alert("CRITICAL ERROR: Database Not Connected!\n\nTo fix this:\n1. Deploy 'Code.gs' as a Web App.\n2. Paste the Web App URL into the 'WEB_APP_URL' variable in index.html (Line ~360).");
+                    throw new Error("Database not connected");
+                }
+            } catch (e) {
+                hideBuffer();
+                console.error(e);
+                return { status: 'error', message: e.message };
+            }
+        }
+
+        function getActionMessage(action) {
+            switch (action) {
+                case 'login': return "Authenticating User...";
+                case 'markAttendance': return "Verifying Location...";
+                case 'addStaff': return "Adding Staff...";
+                case 'addBranch': return "Adding Branch...";
+                case 'assignLeads': return "Assigning Leads...";
+                case 'addLead': return "Adding Lead...";
+                case 'addStudent': return "Enrolling Student...";
+                case 'enrollAndConvertLead': return "Converting Lead and Enrolling Student...";
+                case 'markStudentAttendance': return "Marking Student Attendance...";
+                case 'changePassword': return "Updating Password..."; // NEW MESSAGE
+                default: return "Processing...";
+            }
+        }
+
+        // --- Auth & User Management ---
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username && password) {
+                const res = await callAPI('login', { username, password });
+                if (res.status === 'success') {
+                    currentUser = res.user;
+                    initDashboard();
+                } else {
+                    // Use custom modal/alert replacement instead of native alert()
+                    alert(res.message || 'Login Failed');
+                }
+            }
+        });
+
+        function initDashboard() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.role} - ${currentUser.branch})`;
+            document.getElementById('user-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
+
+            document.querySelectorAll('.dashboard-view').forEach(el => el.classList.add('hidden'));
+
+            const role = currentUser.role.toLowerCase();
+            const dashId = `dashboard-${role}`;
+            const dashEl = document.getElementById(dashId);
+            if (dashEl) {
+                dashEl.classList.remove('hidden');
+                loadDashboardData();
+            } else {
+                // Use custom modal/alert replacement instead of native alert()
+                alert("Dashboard not found for role: " + role);
+            }
+            // For Boss dashboard, show the Staff tab by default
+            if (role === 'boss') showTab('boss', 'staff');
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('app-container').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('login-form').reset();
+            currentPosition = null; // Clear position on logout
+        }
+        
+        // NEW FUNCTION: Handle Password Change
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (newPassword !== confirmPassword) {
+                return alert("New password and confirmation do not match.");
+            }
+            if (newPassword.length < 6) {
+                return alert("Password must be at least 6 characters long.");
+            }
+
+            const payload = {
+                userId: currentUser.id,
+                newPassword: newPassword
+            };
+
+            const res = await callAPI('changePassword', payload);
+            if (res.status === 'success') {
+                alert(res.message || 'Password updated successfully!');
+                document.getElementById('change-password-modal').classList.add('hidden');
+                document.querySelector('#change-password-modal form').reset();
+            } else {
+                alert('Error changing password: ' + res.message);
+            }
+        }
+
+
+        // --- Staff Attendance (Geo-Fencing) ---
+
+        async function startAttendance() {
+            if (!currentUser.branch) {
+                // Use custom modal/alert replacement instead of native alert()
+                alert("Your branch is not defined. Cannot mark attendance. Contact admin.");
+                return;
+            }
+
+            showBuffer("Requesting Geo-Location...");
+            const modal = document.getElementById('attendance-modal');
+            const btn = document.getElementById('btn-capture');
+            modal.classList.remove('hidden');
+            document.getElementById('location-status').innerText = "Waiting for location...";
+            document.getElementById('btn-capture').innerText = "Submit Attendance";
+
+            // Get location
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    currentPosition = pos.coords;
+                    document.getElementById('location-status').innerText = `Location Acquired: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+                    document.getElementById('btn-capture').disabled = false;
+                    hideBuffer();
+                },
+                (err) => {
+                    document.getElementById('location-status').innerText = "Location Error: " + err.message + ". Check your device settings and ensure the app is deployed securely (HTTPS).";
+                    // Use custom modal/alert replacement instead of native alert()
+                    alert("Location access is required for attendance.");
+                    hideBuffer();
+                    closeAttendance();
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 } // Increased timeout
+            );
+        }
+
+        function closeAttendance() {
+            document.getElementById('attendance-modal').classList.add('hidden');
+            document.getElementById('btn-capture').disabled = true;
+            document.getElementById('location-status').innerText = "Waiting for location...";
+            currentPosition = null;
+        }
+
+        async function submitAttendance() {
+            if (!currentPosition) {
+                // Use custom modal/alert replacement instead of native alert()
+                alert("Location not acquired. Please try again.");
+                return;
+            }
+            
+            closeAttendance(); // Close modal immediately
+
+            const payload = {
+                userId: currentUser.id,
+                role: currentUser.role,
+                lat: currentPosition.latitude,
+                lng: currentPosition.longitude,
+                branch: currentUser.branch // Pass branch name for lookup
+            };
+
+            try {
+                const res = await callAPI('markAttendance', payload);
+                if (res.status === 'success') {
+                    // Use custom modal/alert replacement instead of native alert()
+                    alert("Attendance Marked Successfully!");
+                    loadDashboardData();
+                } else {
+                    // Use custom modal/alert replacement instead of native alert()
+                    alert("Attendance Failed: " + res.message);
+                }
+            } catch (e) {
+                // Use custom modal/alert replacement instead of native alert()
+                alert("Error submitting attendance: " + e.message);
+            }
+        }
+
+        // --- UI Helpers ---
+
+        function showTab(role, tabName) {
+            // Remove active state from all buttons in the tab container
+            document.querySelectorAll(`#dashboard-${role} .flex.space-x-4 button`).forEach(btn => {
+                btn.classList.remove('border-blue-500', 'text-blue-400');
+                btn.classList.add('hover:text-white', 'text-slate-400');
+            });
+            
+            // Set active state on the clicked button
+            const clickedButton = document.querySelector(`#dashboard-${role} button[onclick="showTab('${role}', '${tabName}')"]`);
+            if(clickedButton) {
+                clickedButton.classList.remove('hover:text-white', 'text-slate-400');
+                clickedButton.classList.add('border-b-2', 'border-blue-500', 'text-blue-400');
+            }
+            
+            document.querySelectorAll(`#dashboard-${role} .tab-content`).forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`${role}-tab-${tabName}`);
+            if (target) target.classList.remove('hidden');
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // --- Forms & Data ---
+
+        async function handleFormSubmit(e, action) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+
+            // Add auto-assigned data
+            if (action === 'addStudent') {
+                payload.counselorId = currentUser.id;
+            } else if (action === 'addLead') {
+                payload.counselorId = currentUser.id; // Auto-assign to self
+            }
+
+            const res = await callAPI(action, payload);
+            if (res.status === 'success') {
+                // Use custom modal/alert replacement instead of native alert()
+                alert(res.message || 'Success!');
+                form.reset();
+                closeModal(form.closest('.fixed').id);
+                loadDashboardData();
+            } else {
+                // Use custom modal/alert replacement instead of native alert()
+                alert('Error: ' + res.message);
+            }
+        }
+
+        // NEW: Convert Lead function (Kept logic simplified)
+        function convertLead(leadId) {
+            const lead = window.allLeads.find(l => l.id === leadId);
+            if (!lead) return alert("Lead not found.");
+
+            // Use custom modal/alert replacement instead of native confirm()
+            if (!window.confirm(`Do you want to convert the lead: ${lead.name} (Course: ${lead.course})? This action will open the enrollment form.`)) {
+                return;
+            }
+
+            // 1. Open the student enrollment form and pre-fill details
+            openModal('add-student-modal');
+
+            // 2. Pre-fill the student enrollment form
+            document.querySelector('#add-student-modal input[name="name"]').value = lead.name;
+            document.querySelector('#add-student-modal input[name="phone"]').value = lead.phone;
+            document.querySelector('#add-student-modal input[name="course"]').value = lead.course;
+            
+            // 3. Update the form submission logic for this specific case:
+            const studentForm = document.querySelector('#add-student-modal form');
+            studentForm.onsubmit = (e) => handleEnrollmentConversion(e, leadId);
+
+            // Use custom modal/alert replacement instead of native alert()
+            alert(`Pre-filled enrollment form for ${lead.name}. Please complete the details and click 'Enroll Student' to finalize the conversion.`);
+        }
+
+        async function handleEnrollmentConversion(e, leadId) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+
+            // Add auto-assigned data and the lead ID for deletion
+            payload.counselorId = currentUser.id;
+            payload.leadId = leadId; // Add the lead ID to the payload
+
+            // Call the combined API function
+            const res = await callAPI('enrollAndConvertLead', payload);
+
+            // Restore the original submit handler after execution
+            form.onsubmit = (e) => handleFormSubmit(e, 'addStudent');
+
+            if (res.status === 'success') {
+                // Use custom modal/alert replacement instead of native alert()
+                alert(res.message || 'Success!');
+                form.reset();
+                closeModal(form.closest('.fixed').id);
+                loadDashboardData();
+            } else {
+                // Use custom modal/alert replacement instead of native alert()
+                alert('Error: ' + res.message);
+            }
+        }
+
+
+        async function loadDashboardData() {
+            if (!currentUser) return;
+            const res = await callAPI('getDashboardData', { role: currentUser.role, userId: currentUser.id });
+            if (res.status === 'success') {
+                // Populate Branch Dropdowns before rendering the rest of the dashboard
+                populateBranchDropdowns(res.data.branchNames);
+                renderDashboard(res.data);
+            }
+        }
+        
+        // UPDATED FUNCTION: Populate Branch Dropdowns
+        function populateBranchDropdowns(branchNames) {
+            const staffBranchSelect = document.getElementById('staff-branch-select');
+            const studentBranchSelect = document.getElementById('student-branch-select');
+
+            // Filter branch names for the Counselor's student enrollment form
+            let counselorBranches = branchNames;
+            if (currentUser && currentUser.role === 'Counselor') {
+                counselorBranches = branchNames.filter(name => name === 'PN' || name === 'MANSAROVAR');
+            }
+
+            // Helper function to create HTML options
+            const createOptions = (names) => {
+                const optionsHtml = ['<option value="">Select Branch</option>'];
+                if (names) {
+                    names.forEach(name => {
+                        optionsHtml.push(`<option value="${name}">${name}</option>`);
+                    });
+                }
+                return optionsHtml.join('');
+            }
+
+            // Populate Staff Branch Dropdown (shows all)
+            if (staffBranchSelect) staffBranchSelect.innerHTML = createOptions(branchNames);
+            
+            // Populate Student Branch Dropdown (shows filtered list for Counselor, all for others)
+            if (studentBranchSelect) {
+                // Determine which list of branches to use
+                const listToUse = currentUser && currentUser.role === 'Counselor' ? counselorBranches : branchNames;
+                const finalHtml = createOptions(listToUse);
+
+                // Check if a value is currently selected (e.g., during lead conversion)
+                if (!studentBranchSelect.value) {
+                    studentBranchSelect.innerHTML = finalHtml;
+                } else {
+                    // Update dropdown options while keeping the current selection if it exists
+                    const currentValue = studentBranchSelect.value;
+                    studentBranchSelect.innerHTML = finalHtml;
+                    studentBranchSelect.value = currentValue;
+                }
+            }
+        }
+
+
+        function formatCurrency(amount) {
+            // Simple currency formatting for Indian Rupees
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
+        }
+
+
+        function renderDashboard(data) {
+            if (!data) return;
+            const role = currentUser.role.toLowerCase();
+
+            // Common: Populate Faculty Dropdown
+            const facultySelect = document.getElementById('student-faculty-select');
+            if (facultySelect && data.facultyList) {
+                facultySelect.innerHTML = '<option value="">Select Faculty</option>' +
+                    data.facultyList.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+            }
+
+            // BOSS DASHBOARD RENDERING
+            if (role === 'boss') {
+                // Boss logic (Staff, Branches, Leads)
+                const staffList = document.getElementById('staff-list');
+                if (staffList) staffList.innerHTML = data.staff?.map(s => `
+                    <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
+                        <div>
+                            <p class="font-bold">${s.name}</p>
+                            <p class="text-xs text-slate-400">${s.role} | ${s.branch}</p>
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-center">No staff found.</p>';
+
+                const branchList = document.getElementById('branch-list');
+                if (branchList) branchList.innerHTML = data.branches?.map(b => `
+                    <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                        <p class="font-bold">${b.name}</p>
+                        <p class="text-xs text-slate-400">${b.address}</p>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-center">No branches found.</p>';
+
+                const leadList = document.getElementById('lead-list');
+                if (leadList) leadList.innerHTML = data.leads?.map(l => `
+                    <div class="flex items-center gap-3 bg-slate-900 p-3 rounded border border-slate-700">
+                        <input type="checkbox" class="lead-checkbox w-4 h-4" value="${l.id}">
+                        <div>
+                            <p class="font-bold">${l.name}</p>
+                            <p class="text-xs text-slate-400">${l.course} | ${l.phone}</p>
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-center">No unassigned leads.</p>';
+
+                const counselorSelect = document.getElementById('assign-counselor-select');
+                if (counselorSelect && data.staff) {
+                    const counselors = data.staff.filter(s => s.role === 'Counselor');
+                    counselorSelect.innerHTML = '<option value="">Select Counselor to Assign</option>' +
+                        counselors.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                }
+                
+                // NEW: Render Analytics Tab
+                renderAnalytics(data.analytics);
+
+            } else if (role === 'counselor') {
+                // Counselor logic (My Leads, All Students)
+                const list = document.getElementById('counselor-lead-list');
+                window.allLeads = data.myLeads; // Store leads globally for conversion logic
+                
+                if (list) list.innerHTML = data.myLeads?.map(l => `
+                    <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
+                        <div>
+                            <p class="font-bold">${l.name}</p>
+                            <p class="text-xs text-slate-400">${l.phone} (${l.course})</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs px-2 py-1 rounded ${l.status === 'Converted' ? 'bg-green-900 text-green-200' : 'bg-blue-900 text-blue-200'}">${l.status}</span>
+                            <button onclick="convertLead('${l.id}')" class="text-xs bg-green-600 px-2 py-1 rounded">Convert</button>
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-center">No leads assigned.</p>';
+
+                // Render Student List
+                const studentList = document.getElementById('counselor-student-list');
+                if (studentList && data.allStudents) {
+                    window.allStudents = data.allStudents; // Store for filtering
+                    studentList.innerHTML = data.allStudents.map(s => {
+                        const facultyName = data.facultyList?.find(f => f.id === s.facultyId)?.name || 'Unassigned';
+                        return `
+                        <tr class="hover:bg-slate-700/50 transition student-row" data-name="${s.name}" data-username="${s.username}">
+                            <td class="px-4 py-3 font-medium text-white">${s.name}</td>
+                            <td class="px-4 py-3">${s.course} (${s.branch})</td>
+                            <td class="px-4 py-3 font-mono text-blue-400">${s.username}</td>
+                            <td class="px-4 py-3 font-mono text-green-400">${s.password}</td>
+                            <td class="px-4 py-3">${facultyName}</td>
+                        </tr>
+                    `;
+                    }).join('') || '<tr><td colspan="5" class="px-4 py-3 text-center">No students found.</td></tr>';
+                }
+
+            } else if (role === 'faculty') {
+                // Faculty logic (My Students, Batch Attendance)
+                const list = document.getElementById('faculty-student-list');
+                if (list) list.innerHTML = data.myStudents?.map(s => `
+                    <div class="flex items-center gap-3 bg-slate-900 p-3 rounded border border-slate-700 faculty-student-row">
+                        <input type="checkbox" class="student-select-checkbox w-4 h-4" value="${s.id}" onchange="updateBatchButtons()">
+                        <div class="flex-1">
+                            <p class="font-bold">${s.name}</p>
+                            <p class="text-xs text-slate-400">${s.course} (${s.branch})</p>
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-center">No students assigned.</p>';
+                
+                updateBatchButtons(); // Initialize button state
+                document.getElementById('select-all-students').checked = false; // Reset select all checkbox
+
+            } else if (role === 'student') {
+                // Student logic (Fee Status, Attendance Log)
+                const feeEl = document.getElementById('student-fee-remaining');
+                if (feeEl) feeEl.innerText = formatCurrency(data.feeRemaining).replace('₹', ''); // Keep only number
+
+                const log = document.getElementById('student-attendance-log');
+                if (log) log.innerHTML = data.attendance?.map(a => `
+                    <div class="flex justify-between bg-slate-900 p-2 rounded border border-slate-700 text-sm">
+                        <span>${new Date(a.date).toLocaleDateString()}</span>
+                        <span class="${a.status === 'Present' ? 'text-green-400' : 'text-red-400'}">${a.status}</span>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-sm">No records found.</p>';
+            }
+        }
+        
+        // NEW FUNCTION: Render Boss Analytics
+        function renderAnalytics(analyticsData) {
+            if (!analyticsData) return;
+
+            const tableBody = document.getElementById('analytics-data-table');
+            tableBody.innerHTML = analyticsData.map(a => `
+                <tr class="hover:bg-slate-700/50 transition">
+                    <td class="px-4 py-3 font-medium text-white">${a.branch}</td>
+                    <td class="px-4 py-3 text-center">${a.staffCount}</td>
+                    <td class="px-4 py-3 text-center">${a.studentCount}</td>
+                    <td class="px-4 py-3 font-bold text-red-400">${formatCurrency(a.feeRemaining)}</td>
+                </tr>
+            `).join('') || '<tr><td colspan="4" class="px-4 py-3 text-center">No branch data available.</td></tr>';
+
+            // Calculate overall totals for summary cards
+            const totalStaff = analyticsData.reduce((sum, a) => sum + a.staffCount, 0);
+            const totalStudents = analyticsData.reduce((sum, a) => sum + a.studentCount, 0);
+            const totalFeeRemaining = analyticsData.reduce((sum, a) => sum + a.feeRemaining, 0);
+
+            const overview = document.getElementById('analytics-overview');
+            overview.innerHTML = `
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                    <p class="text-sm text-blue-400">Total Staff (All Branches)</p>
+                    <p class="text-3xl font-bold text-white">${totalStaff}</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                    <p class="text-sm text-green-400">Total Students (All Branches)</p>
+                    <p class="text-3xl font-bold text-white">${totalStudents}</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                    <p class="text-sm text-red-400">Total Fee Remaining</p>
+                    <p class="text-2xl font-bold text-white">${formatCurrency(totalFeeRemaining)}</p>
+                </div>
+            `;
+        }
+
+
+        async function assignSelectedLeads() {
+            const checkboxes = document.querySelectorAll('#lead-list .lead-checkbox:checked');
+            const leadIds = Array.from(checkboxes).map(cb => cb.value);
+            const counselorId = document.getElementById('assign-counselor-select').value;
+
+            if (leadIds.length === 0) return alert("Select at least one lead.");
+            if (!counselorId) return alert("Select a counselor.");
+
+            const res = await callAPI('assignLeads', { leadIds, counselorId });
+            if (res.status === 'success') {
+                // Use custom modal/alert replacement instead of native alert()
+                alert(res.message || "Leads assigned successfully");
+                loadDashboardData();
+            } else {
+                // Use custom modal/alert replacement instead of native alert()
+                alert("Error assigning leads: " + res.message);
+            }
+        }
+
+        // --- FACULTY BATCH ATTENDANCE LOGIC ---
+
+        function updateBatchButtons() {
+            const checkboxes = document.querySelectorAll('.student-select-checkbox');
+            const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const disable = selectedCount === 0;
+
+            document.getElementById('btn-mark-present').disabled = disable;
+            document.getElementById('btn-mark-absent').disabled = disable;
+        }
+
+        function toggleSelectAll(checked) {
+            const checkboxes = document.querySelectorAll('.student-select-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = checked;
+            });
+            updateBatchButtons();
+        }
+
+        async function markSelectedStudents(status) {
+            const checkboxes = document.querySelectorAll('.student-select-checkbox:checked');
+            const studentIds = Array.from(checkboxes).map(cb => cb.value);
+
+            if (studentIds.length === 0) return alert("Please select students to mark attendance.");
+            
+            // Use custom modal/alert replacement instead of native confirm()
+            if (!window.confirm(`Are you sure you want to mark ${studentIds.length} student(s) as ${status}?`)) return;
+
+            const res = await callAPI('markStudentAttendance', { studentIds, status });
+            if (res.status === 'success') {
+                // Use custom modal/alert replacement instead of native alert()
+                alert(res.message);
+                loadDashboardData();
+            } else {
+                // Use custom modal/alert replacement instead of native alert()
+                alert(`Error marking attendance: ${res.message}`);
+            }
+        }
+
+        // --- Counselor Student Filtering ---
+
+        function filterStudents() {
+            const input = document.getElementById('student-search');
+            const filter = input.value.toLowerCase();
+            const rows = document.querySelectorAll('.student-row');
+
+            rows.forEach(row => {
+                // Check against data attributes for better reliability
+                const name = row.dataset.name.toLowerCase();
+                const username = row.dataset.username.toLowerCase();
+                
+                if (name.includes(filter) || username.includes(filter)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>
