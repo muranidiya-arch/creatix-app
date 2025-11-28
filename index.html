@@ -319,18 +319,21 @@
                 <input type="email" name="email" placeholder="Email (Username)" required
                     class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
                 <select name="role" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition">
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition appearance-none">
+                    <option value="" disabled selected>Select Role</option>
+                    <option value="Boss">Boss</option>
                     <option value="Counselor">Counselor</option>
                     <option value="Faculty">Faculty</option>
-                    <option value="Boss">Boss</option>
                 </select>
-                <input type="text" name="branch" placeholder="Branch Name" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
-                <input type="password" name="password" placeholder="Password" required
+                <select name="branch" id="add-staff-branch-select" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition appearance-none">
+                    <option value="" disabled selected>Select Branch</option>
+                </select>
+                <input type="password" name="password" placeholder="Temporary Password" required
                     class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
                 <button type="submit"
                     class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-bold transition transform hover:scale-[1.01] active:scale-[0.99]">
-                    Create Staff
+                    Add Staff
                 </button>
             </form>
         </div>
@@ -348,15 +351,39 @@
             <form onsubmit="handleFormSubmit(event, 'addBranch')" class="space-y-4">
                 <input type="text" name="name" placeholder="Branch Name" required
                     class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
-                <input type="text" name="address" placeholder="Address" required
+                <input type="text" name="address" placeholder="Full Address" required
                     class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
-                <input type="number" step="any" name="lat" placeholder="Latitude" required
+                <input type="number" step="any" name="lat" placeholder="Latitude (e.g. 26.9124)" required
                     class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
-                <input type="number" step="any" name="lng" placeholder="Longitude" required
+                <input type="number" step="any" name="lng" placeholder="Longitude (e.g. 75.7873)" required
                     class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
                 <button type="submit"
                     class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-bold transition transform hover:scale-[1.01] active:scale-[0.99]">
                     Add Branch
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="assign-leads-modal"
+        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div
+            class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700 shadow-2xl transition-all duration-300 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6 border-b border-slate-700/50 pb-3">
+                <h3 class="text-2xl font-bold text-slate-100">Assign Leads</h3>
+                <button onclick="closeModal('assign-leads-modal')"
+                    class="text-slate-400 hover:text-white text-3xl transition-colors">&times;</button>
+            </div>
+            <p id="assign-leads-message" class="text-slate-400 mb-4"></p>
+            <form onsubmit="handleFormSubmit(event, 'assignLeads')" id="assign-leads-form" class="space-y-4">
+                <input type="hidden" name="leadIds" id="hidden-lead-ids">
+                <select name="counselorId" id="modal-counselor-select" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition appearance-none">
+                    <option value="" disabled selected>Select Counselor</option>
+                </select>
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-bold transition transform hover:scale-[1.01] active:scale-[0.99]">
+                    Assign Leads
                 </button>
             </form>
         </div>
@@ -386,40 +413,59 @@
         </div>
     </div>
 
-    <div id="add-student-modal"
-        class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="add-student-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
         <div
-            class="bg-slate-800 rounded-xl w-full max-w-lg p-6 border border-slate-700 shadow-2xl transition-all duration-300 max-h-[90vh] overflow-y-auto">
+            class="bg-slate-800 rounded-xl w-full max-w-lg p-6 border border-slate-700 shadow-2xl transition-all duration-300 max-h-[95vh] overflow-y-auto custom-scrollbar">
             <div class="flex justify-between items-center mb-6 border-b border-slate-700/50 pb-3">
-                <h3 class="text-2xl font-bold text-slate-100">Enroll Student</h3>
+                <h3 class="text-2xl font-bold text-slate-100">Enroll New Student</h3>
                 <button onclick="closeModal('add-student-modal')"
                     class="text-slate-400 hover:text-white text-3xl transition-colors">&times;</button>
             </div>
-            <form onsubmit="handleFormSubmit(event, 'addStudent')" class="space-y-4 grid grid-cols-1 sm:grid-cols-2 gap-4"
-                id="enroll-student-form">
+            <form onsubmit="handleFormSubmit(event, 'addStudent')" id="add-student-form" class="space-y-4">
+                <p class="text-sm text-yellow-400 bg-slate-700/50 p-3 rounded-lg">
+                    Students automatically get a **Student** user role. Counselor ID will be set to the current user.
+                </p>
                 <input type="hidden" name="leadId" id="enroll-lead-id">
-                <input type="text" name="name" placeholder="Student Name" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500 sm:col-span-2">
-                <input type="tel" name="phone" placeholder="Phone" required
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" name="name" placeholder="Full Name" required
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
+                    <input type="tel" name="phone" placeholder="Phone Number" required
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
+                </div>
+
+                <input type="text" name="course" placeholder="Enrolling Course" required
                     class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
-                <input type="text" name="course" placeholder="Course" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
-                <input type="text" name="branch" placeholder="Branch Name" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
-                <select name="facultyId" id="student-faculty-select" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition">
-                    <option value="">Select Faculty</option>
+
+                <select name="branch" id="add-student-branch-select" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition appearance-none">
+                    <option value="" disabled selected>Select Branch</option>
                 </select>
-                <input type="number" name="totalFee" placeholder="Total Fee (e.g. 50000)" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
-                <input type="number" name="paidFee" placeholder="Initial Payment (e.g. 10000)" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
-                <input type="text" name="username" placeholder="Student Username" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
-                <input type="password" name="password" placeholder="Password" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="number" step="0.01" name="totalFee" placeholder="Total Course Fee" required
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
+                    <input type="number" step="0.01" name="paidFee" placeholder="Fee Paid (Initial)" required
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition placeholder-slate-500">
+                </div>
+
+                <select name="facultyId" id="add-student-faculty-select" required
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition appearance-none">
+                    <option value="" disabled selected>Select Primary Faculty</option>
+                </select>
+
+                <div class="bg-slate-700 p-4 rounded-lg space-y-3">
+                    <h4 class="text-md font-semibold text-slate-200">Student Login Details</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" name="username" placeholder="Username (e.g. phone number)" required
+                            class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-green-500 outline-none transition placeholder-slate-500">
+                        <input type="text" name="password" placeholder="Temporary Password" required
+                            class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-green-500 outline-none transition placeholder-slate-500">
+                    </div>
+                </div>
+
                 <button type="submit"
-                    class="w-full bg-green-600 hover:bg-green-700 py-3 rounded-lg font-bold transition transform hover:scale-[1.01] active:scale-[0.99] sm:col-span-2 mt-4">
+                    class="w-full bg-green-600 hover:bg-green-700 py-3 rounded-lg font-bold transition transform hover:scale-[1.01] active:scale-[0.99]">
                     Enroll Student
                 </button>
             </form>
@@ -450,39 +496,28 @@
 
     <div id="attendance-modal"
         class="fixed inset-0 z-40 bg-black/90 flex flex-col items-center justify-center hidden p-4 backdrop-blur-sm">
-        <div
-            class="w-full max-w-4xl h-full max-h-[90vh] bg-slate-800 rounded-xl overflow-hidden shadow-2xl flex flex-col border border-slate-700">
-            <div class="p-4 bg-slate-700 flex justify-between items-center shadow-lg">
-                <h3 class="font-bold text-white text-xl">External Attendance Portal</h3>
-                <button onclick="closeAttendance()"
-                    class="text-slate-300 hover:text-white text-2xl p-1 rounded-full hover:bg-slate-600 transition">&times;</button>
-            </div>
-            <div class="flex-1">
-                <iframe id="attendance-iframe" class="w-full h-full border-0 bg-white" src=""
-                    title="External Link"></iframe>
+        <div class="bg-slate-800 rounded-xl w-full max-w-lg p-6 border border-slate-700 shadow-2xl space-y-4">
+            <h3 class="text-2xl font-bold text-slate-100">Mark Attendance</h3>
+            <p class="text-slate-400">Please complete the attendance via the external link below. This ensures location verification.</p>
+            <iframe id="attendance-iframe" class="w-full h-80 rounded-lg border border-slate-700" frameborder="0"></iframe>
+            <div class="flex justify-end">
+                <button onclick="closeModal('attendance-modal')"
+                    class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg text-white font-bold transition">Close</button>
             </div>
         </div>
     </div>
 
-    <footer class="text-center p-4 text-slate-500 text-sm mt-auto border-t border-slate-800">
-        Made with ❤️ by Tanush
-    </footer>
 
     <script>
-        // --- State ---
+        const WEB_APP_URL = "";
+        const EXTERNAL_ATTENDANCE_URL = ""; // Optional: For external geo-location or form link
+
+        // Global variables
         let currentUser = null;
-        let currentPosition = null;
+        window.allLeads = []; // Global store for counselor leads
 
-        // --- Configuration ---
-        // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL FOR LOCAL TESTING
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwnRo9Kr08wSrphW-47eBY7GTPSzDIptOw1Pk5fmwdB7OOmlqDFW2Q1vcELYW2xwTuCFQ/exec";
-
-        // NEW: External URL for 'Mark My Attendance'
-        const EXTERNAL_ATTENDANCE_URL = "https://www.google.com"; // Change this to your desired attendance link
-
-        // --- Core Functions ---
-
-        function showBuffer(message = "Loading...") {
+        // --- Core API Call Function ---
+        function showBuffer(message = "Processing...") {
             document.getElementById('buffer-message').innerText = message;
             document.getElementById('cool-buffer').classList.remove('hidden');
         }
@@ -491,29 +526,20 @@
             document.getElementById('cool-buffer').classList.add('hidden');
         }
 
-        async function callAPI(action, payload = {}) {
-            showBuffer(getActionMessage(action));
+        async function callAPI(action, payload) {
             try {
-                // 1. Try Google Apps Script Native (Deployed Web App)
-                if (typeof google !== 'undefined' && google.script) {
+                // 1. Check for Google Apps Script Global 'google' object
+                if (typeof google !== 'undefined' && google.script && google.script.run) {
+                    showBuffer(getActionMessage(action));
                     return new Promise((resolve, reject) => {
-                        // Pass the entire payload as contents of postData for doPost
                         google.script.run
-                            .withSuccessHandler(response => {
+                            .withSuccessHandler(data => {
                                 hideBuffer();
-                                // IMPORTANT: Apps Script native response is already parsed (or can be treated as string).
-                                // But since Code.gs returns JSON string, we must parse it here.
-                                // If the return type were set to CONTENT, the parsing would be different.
-                                // Stick to the original for consistency.
-                                try {
-                                    resolve(JSON.parse(response));
-                                } catch (e) {
-                                    resolve(response);
-                                }
+                                resolve(data);
                             })
                             .withFailureHandler(error => {
                                 hideBuffer();
-                                alert("API Error: " + error);
+                                console.error("API Call Error: " + error);
                                 reject(error);
                             })
                             .doPost({ postData: { contents: JSON.stringify({ action, ...payload }) } });
@@ -553,13 +579,12 @@
                 case 'addStudent': return "Enrolling Student...";
                 case 'enrollAndConvertLead': return "Enrolling Student & Converting Lead..."; // NEW MESSAGE
                 case 'markStudentAttendance': return "Marking Student Attendance...";
-                case 'changePassword': return "Updating Password..."; // NEW MESSAGE
+                case 'changePassword': return "Updating Password...";
                 default: return "Processing...";
             }
         }
 
         // --- Auth ---
-
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
@@ -567,34 +592,39 @@
 
             if (username && password) {
                 const res = await callAPI('login', { username, password });
+
                 if (res.status === 'success') {
                     currentUser = res.user;
-                    initDashboard();
+                    initializeUI();
+                    await loadDashboardData();
                 } else {
-                    alert(res.message || 'Login Failed');
+                    alert("Login Failed: " + res.message);
                 }
             }
         });
 
-        function initDashboard() {
+        function initializeUI() {
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
-            document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.role} - ${currentUser.branch})`;
+
+            const role = currentUser.role.toLowerCase();
+            document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.branch} - ${currentUser.role})`;
             document.getElementById('user-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
 
             document.querySelectorAll('.dashboard-view').forEach(el => el.classList.add('hidden'));
-
-            const role = currentUser.role.toLowerCase();
-            const dashId = `dashboard-${role}`;
-            const dashEl = document.getElementById(dashId);
-            if (dashEl) {
-                dashEl.classList.remove('hidden');
-                loadDashboardData();
+            const dashboard = document.getElementById(`dashboard-${role}`);
+            if (dashboard) {
+                dashboard.classList.remove('hidden');
             } else {
-                alert("Dashboard not found for role: " + role);
+                // Default fallback or simple view
+                alert(`Dashboard not configured for role: ${currentUser.role}`);
+                document.getElementById('dashboard-counselor').classList.remove('hidden');
             }
-            // For Boss dashboard, show the Staff tab by default
-            if (role === 'boss') showTab('boss', 'staff');
+
+            // Default tab for Boss view
+            if (role === 'boss') {
+                showTab('boss', 'staff');
+            }
         }
 
         function logout() {
@@ -602,132 +632,107 @@
             document.getElementById('app-container').classList.add('hidden');
             document.getElementById('login-section').classList.remove('hidden');
             document.getElementById('login-form').reset();
-            currentPosition = null; // Clear position on logout
+            alert("You have been logged out.");
         }
 
-        // --- Staff Attendance (Geo-Fencing) ---
-
-        // NEW FUNCTION: To handle the 'internal redirect' requirement
-        function startAttendance_internal() {
-            if (!currentUser || currentUser.role === 'Student') return alert("This function is for staff only.");
-
-            const modal = document.getElementById('attendance-modal');
-            const iframe = document.getElementById('attendance-iframe');
-
-            // Set the iframe source to the external URL
-            iframe.src = EXTERNAL_ATTENDANCE_URL;
-
-            // Show the modal
-            modal.classList.remove('hidden');
-
-            // Optional: You might want to remove the iframe to prevent background loading on close
-            // For geo-location attendance, keep the old one, and hide this.
-            // Since the request is to "redirect to another link", this implementation fulfills it.
-        }
-
-        // Keep original startAttendance for old logic/direct API call.
-        // Renamed original function slightly to avoid conflict if both were used.
-        /*
-        async function startAttendance() {
-            // ... original Geo-location logic ...
-        }
-        */
-
-        function closeAttendance() {
-            document.getElementById('attendance-modal').classList.add('hidden');
-            document.getElementById('attendance-iframe').src = ''; // Clear iframe source
-        }
-
-        async function submitAttendance() {
-            // ... original Geo-location submission logic ... (No longer directly linked to the button)
-        }
-
-        // --- UI Helpers ---
-
-        function showTab(role, tabName) {
-            // Remove active state from all buttons in the tab container
-            document.querySelectorAll(`#dashboard-${role} .flex.space-x-4 button`).forEach(btn => {
-                btn.classList.remove('text-blue-400', 'border-blue-500', 'border-b-2');
-                btn.classList.add('text-slate-400', 'hover:text-white');
-            });
-
-            // Set active state on the clicked button
-            const clickedButton = document.querySelector(`#dashboard-${role} button[onclick="showTab('${role}', '${tabName}')"]`);
-            if (clickedButton) {
-                clickedButton.classList.remove('text-slate-400', 'hover:text-white');
-                clickedButton.classList.add('text-blue-400', 'border-blue-500', 'border-b-2');
-            }
-
-            document.querySelectorAll(`#dashboard-${role} .tab-content`).forEach(el => el.classList.add('hidden'));
-            const target = document.getElementById(`${role}-tab-${tabName}`);
-            if (target) target.classList.remove('hidden');
-        }
-
-        // *** FIX IMPLEMENTED HERE ***
+        // --- Modals ---
         function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-            // Prevent body scrolling when a modal is open
-            document.body.classList.add('overflow-hidden');
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
         }
 
-        // *** FIX IMPLEMENTED HERE ***
         function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-            // Re-enable body scrolling when a modal is closed
-            document.body.classList.remove('overflow-hidden');
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.add('hidden');
+                // Optional: Clear form contents on close for forms that aren't for data entry
+                if (id === 'add-student-modal' || id === 'add-lead-modal') {
+                     document.getElementById(id).querySelector('form').reset();
+                     document.getElementById('enroll-lead-id').value = ''; // Ensure hidden field is cleared
+                }
+            }
         }
 
-        // --- Forms & Data ---
 
-        async function handleFormSubmit(e, action) {
+        // **MODIFIED** - Added logic to switch action for Lead Conversion
+        async function handleFormSubmit(e, actionOverride) {
             e.preventDefault();
             const form = e.target;
             const formData = new FormData(form);
-            const payload = Object.fromEntries(formData.entries());
+            const payload = {};
 
-            // Determine the correct action based on context
-            let finalAction = action;
-            if (action === 'addStudent' && payload.leadId) {
-                finalAction = 'enrollAndConvertLead';
-                payload.studentDetails = payload; // Package student details
+            formData.forEach((value, key) => {
+                // Simple type conversion for known number fields
+                if (key === 'totalFee' || key === 'paidFee') {
+                    payload[key] = parseFloat(value) || 0;
+                } else {
+                    payload[key] = value;
+                }
+            });
+
+            let finalAction = actionOverride;
+
+            // NEW LOGIC for Lead Conversion: Switch to 'enrollAndConvertLead' if a leadId is present
+            if (actionOverride === 'addStudent') {
+                const leadIdInput = document.getElementById('enroll-lead-id');
+                if (leadIdInput && leadIdInput.value) {
+                    finalAction = 'enrollAndConvertLead';
+                    payload.leadId = leadIdInput.value;
+                }
             }
 
-            // Add auto-assigned data
-            if (finalAction === 'addStudent' || finalAction === 'enrollAndConvertLead') {
-                payload.counselorId = currentUser.id;
-            } else if (finalAction === 'addLead') {
-                payload.counselorId = currentUser.id; // Auto-assign to self
-            }
-
+            // The rest of the function remains the same
+            showBuffer(getActionMessage(finalAction));
             const res = await callAPI(finalAction, payload);
+
             if (res.status === 'success') {
-                alert(res.message || 'Success!');
+                alert(res.message);
                 form.reset();
-                document.getElementById('enroll-lead-id').value = ''; // Clear leadId field
-                closeModal(form.closest('.fixed').id);
-                loadDashboardData();
+                 // Clear hidden lead ID after successful submission
+                if (finalAction === 'enrollAndConvertLead') {
+                     document.getElementById('enroll-lead-id').value = '';
+                }
+                const modal = form.closest('.fixed');
+                if (modal) {
+                    closeModal(modal.id);
+                }
+                await loadDashboardData();
             } else {
-                alert('Error: ' + res.message);
+                alert("Error: " + res.message);
             }
         }
 
-        // MODIFIED: Convert Lead function (to use leadId in the form for deletion)
-        function convertLead(leadId) {
+        // NEW: Function to open form and pre-fill for lead conversion
+        function convertLeadToStudent(leadId) {
             const lead = window.allLeads.find(l => l.id === leadId);
             if (!lead) return alert("Lead not found.");
 
-            if (!confirm(`Do you want to convert the lead: ${lead.name} (Course: ${lead.course})? This action will open the enrollment form.`)) {
+            if (!confirm(`Do you want to convert the lead: ${lead.name} (Course: ${lead.course})? This action will open the enrollment form and REMOVE the lead upon enrollment.`)) {
                 return;
             }
 
             // 1. Open the student enrollment form
             openModal('add-student-modal');
 
-            // 2. Pre-fill the student enrollment form AND set the hidden lead ID
+            // 2. Clear/Reset the form and lead ID before setting new values
+            document.getElementById('add-student-form').reset();
+            document.querySelector('#enroll-lead-id').value = ''; 
+
+            // 3. Pre-fill the student enrollment form AND set the hidden lead ID
             document.querySelector('#enroll-lead-id').value = lead.id; // Set Lead ID here
             document.querySelector('#add-student-modal input[name="name"]').value = lead.name;
             document.querySelector('#add-student-modal input[name="phone"]').value = lead.phone;
             document.querySelector('#add-student-modal input[name="course"]').value = lead.course;
+            
+            // Auto-fill temporary username/password from phone number
+            const phone = lead.phone.replace(/\D/g, ''); 
+            if (phone.length >= 10) {
+                document.querySelector('#add-student-modal input[name="username"]').value = phone.substring(phone.length - 10);
+                document.querySelector('#add-student-modal input[name="password"]').value = phone.substring(phone.length - 6);
+            }
+
 
             alert(`Pre-filled enrollment form for ${lead.name}. Click 'Enroll Student' to finalize the conversion and remove the lead.`);
         }
@@ -744,10 +749,7 @@
                 return alert("New password and confirmation do not match.");
             }
 
-            const payload = {
-                userId: currentUser.id,
-                newPassword: newPassword
-            };
+            const payload = { userId: currentUser.id, newPassword: newPassword };
 
             const res = await callAPI('changePassword', payload);
 
@@ -764,6 +766,7 @@
         async function loadDashboardData() {
             if (!currentUser) return;
             const res = await callAPI('getDashboardData', { role: currentUser.role, userId: currentUser.id });
+
             if (res.status === 'success') {
                 renderDashboard(res.data);
             }
@@ -774,38 +777,39 @@
             const role = currentUser.role.toLowerCase();
 
             // Common: Populate Faculty Dropdown
-            const facultySelect = document.getElementById('student-faculty-select');
-            if (facultySelect && data.facultyList) {
-                facultySelect.innerHTML = '<option value="">Select Faculty</option>' +
-                    data.facultyList.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+            const facultySelect = document.getElementById('add-student-faculty-select');
+            if (facultySelect && data.staff) {
+                const faculties = data.staff.filter(s => s.role === 'Faculty');
+                facultySelect.innerHTML = '<option value="" disabled selected>Select Primary Faculty</option>' + faculties.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
             }
 
-            // Common: Render My Attendance Log (for non-students)
-            if (role !== 'student') {
-                const attLogId = `attendance-log-${role}`;
-                const attLog = document.getElementById(attLogId);
-                if (attLog) {
-                    attLog.innerHTML = data.attendance?.map(a => `
-                        <div class="flex justify-between bg-slate-900 p-2 rounded-lg border border-slate-700 text-sm">
-                            <span>${new Date(a.date).toLocaleString()}</span>
-                            <span class="${a.status === 'Present' ? 'text-green-400 font-semibold' : 'text-red-400 font-semibold'}">${a.status}</span>
-                        </div>
-                    `).join('') || '<p class="text-slate-500 text-sm">No attendance records.</p>';
-                }
+            // Common: Populate Branch Dropdown
+            const branchSelects = document.querySelectorAll('#add-staff-branch-select, #add-student-branch-select');
+            if (branchSelects.length > 0 && data.branches) {
+                const branchOptions = '<option value="" disabled selected>Select Branch</option>' + data.branches.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+                branchSelects.forEach(select => {
+                    if (select.id !== 'add-student-branch-select' || !document.getElementById('enroll-lead-id').value) {
+                        select.innerHTML = branchOptions;
+                    }
+                });
             }
 
             if (role === 'boss') {
                 // Boss logic (Staff, Branches, Leads)
+
+                // Render Staff List
                 const staffList = document.getElementById('staff-list');
                 if (staffList) staffList.innerHTML = data.staff?.map(s => `
-                    <div class="flex justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-700 hover:bg-slate-700/50 transition">
+                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 flex justify-between items-center hover:bg-slate-700/50 transition">
                         <div>
                             <p class="font-bold text-slate-100">${s.name}</p>
                             <p class="text-xs text-slate-400">${s.role} | ${s.branch}</p>
                         </div>
+                        <p class="text-sm text-blue-400">${s.username}</p>
                     </div>
                 `).join('') || '<p class="text-slate-500 text-center">No staff found.</p>';
 
+                // Render Branch List
                 const branchList = document.getElementById('branch-list');
                 if (branchList) branchList.innerHTML = data.branches?.map(b => `
                     <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 hover:bg-slate-700/50 transition">
@@ -814,6 +818,7 @@
                     </div>
                 `).join('') || '<p class="text-slate-500 text-center">No branches found.</p>';
 
+                // Render Leads for Assignment
                 const leadList = document.getElementById('lead-list');
                 if (leadList) leadList.innerHTML = data.leads?.map(l => `
                     <div class="flex items-center gap-3 bg-slate-900 p-3 rounded-lg border border-slate-700 hover:bg-slate-700/50 transition">
@@ -825,64 +830,86 @@
                     </div>
                 `).join('') || '<p class="text-slate-500 text-center">No unassigned leads.</p>';
 
+                // Populate Counselor Select for Assignment
                 const counselorSelect = document.getElementById('assign-counselor-select');
                 if (counselorSelect && data.staff) {
                     const counselors = data.staff.filter(s => s.role === 'Counselor');
-                    counselorSelect.innerHTML = '<option value="">Select Counselor to Assign</option>' +
-                        counselors.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                    counselorSelect.innerHTML = '<option value="">Select Counselor to Assign</option>' + counselors.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
                 }
 
             } else if (role === 'counselor') {
-                // Counselor logic (My Leads, All Students)
-                const list = document.getElementById('counselor-lead-list');
-                window.allLeads = data.myLeads; // Store leads globally for conversion logic
+                // Counselor logic (My Leads, All Students, My Attendance)
 
-                if (list) list.innerHTML = data.myLeads?.map(l => `
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 p-3 rounded-lg border border-slate-700 hover:bg-slate-700/50 transition">
-                        <div class="mb-2 sm:mb-0">
+                // Store leads globally for easy access in convertLeadToStudent
+                window.allLeads = data.myLeads || [];
+
+                // Render My Leads
+                const counselorLeadList = document.getElementById('counselor-lead-list');
+                if (counselorLeadList) counselorLeadList.innerHTML = window.allLeads.map(l => `
+                    <div class="flex justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-700 hover:bg-slate-700/50 transition">
+                        <div>
                             <p class="font-bold text-slate-100">${l.name}</p>
-                            <p class="text-xs text-slate-400">${l.phone} (${l.course})</p>
+                            <p class="text-xs text-slate-400">${l.course} | ${l.phone} | Status: ${l.status || 'New'}</p>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs px-2 py-1 rounded-full ${l.status === 'Converted' ? 'bg-green-900 text-green-200 font-semibold' : 'bg-blue-900 text-blue-200 font-semibold'}">${l.status}</span>
-                            ${l.status !== 'Converted' ? `<button onclick="convertLead('${l.id}')" class="text-xs bg-green-600 hover:bg-green-700 px-3 py-1 rounded-full text-white font-bold transition">Convert</button>` : ''}
-                        </div>
+                        <button onclick="convertLeadToStudent('${l.id}')" class="bg-purple-600 hover:bg-purple-700 text-xs px-3 py-1 rounded font-bold transition">Convert to Student</button>
                     </div>
-                `).join('') || '<p class="text-slate-500 text-center">No leads assigned.</p>';
+                `).join('') || '<p class="text-slate-500 text-center">No leads currently assigned to you.</p>';
 
-                // Render Student List
+                // Render All Students
                 const studentList = document.getElementById('counselor-student-list');
-                if (studentList && data.allStudents) {
-                    window.allStudents = data.allStudents; // Store for filtering
-                    studentList.innerHTML = data.allStudents.map(s => {
-                        const facultyName = data.facultyList?.find(f => f.id === s.facultyId)?.name || 'Unassigned';
-                        return `
-                        <tr class="hover:bg-slate-700/50 transition student-row" data-name="${s.name}" data-username="${s.username}">
-                            <td class="px-4 py-3 font-medium text-white">${s.name}</td>
-                            <td class="px-4 py-3">${s.course} <span class="text-xs text-slate-500">(${s.branch})</span></td>
-                            <td class="px-4 py-3 font-mono text-blue-400">${s.username}</td>
-                            <td class="px-4 py-3 font-mono text-green-400">${s.password}</td>
-                            <td class="px-4 py-3 text-sm">${facultyName}</td>
+                if (studentList) studentList.innerHTML = data.allStudents?.map(s => {
+                    const facultyName = data.staff?.find(f => f.id === s.facultyId)?.name || 'N/A';
+                    return `
+                        <tr class="student-row hover:bg-slate-700/50" data-name="${s.name}" data-username="${s.username}">
+                            <td class="px-4 py-3 font-medium text-slate-200">${s.name}</td>
+                            <td class="px-4 py-3">${s.course} (${s.branch})</td>
+                            <td class="px-4 py-3 text-yellow-400 font-mono">${s.username}</td>
+                            <td class="px-4 py-3 text-red-400 font-mono">${s.password}</td>
+                            <td class="px-4 py-3">${facultyName}</td>
                         </tr>
                     `;
-                    }).join('') || '<tr><td colspan="5" class="px-4 py-5 text-center text-slate-500">No students found.</td></tr>';
-                }
+                }).join('') || '<tr><td colspan="5" class="px-4 py-5 text-center text-slate-500">No students enrolled yet.</td></tr>';
+
+                // Render Attendance Log
+                const logC = document.getElementById('attendance-log-counselor');
+                if (logC) logC.innerHTML = data.attendance?.map(a => `
+                    <div class="flex justify-between bg-slate-900 p-2 rounded-lg border border-slate-700 text-sm">
+                        <span class="font-medium">${new Date(a.date).toLocaleDateString()}</span>
+                        <span class="${a.status === 'Present' ? 'text-green-400 font-semibold' : 'text-red-400 font-semibold'}">${a.status}</span>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-sm">No attendance records found.</p>';
+
 
             } else if (role === 'faculty') {
-                // Faculty logic (My Students, Batch Attendance)
-                const list = document.getElementById('faculty-student-list');
-                if (list) list.innerHTML = data.myStudents?.map(s => `
-                    <div class="flex items-center gap-3 bg-slate-900 p-3 rounded-lg border border-slate-700 faculty-student-row hover:bg-slate-700/50 transition">
-                        <input type="checkbox" class="student-select-checkbox w-5 h-5 form-checkbox text-blue-500 bg-slate-800 border-slate-600 rounded focus:ring-blue-500" value="${s.id}" onchange="updateBatchButtons()">
-                        <div class="flex-1">
+                // Faculty logic (My Students, My Attendance)
+
+                // Store student list globally for selection
+                window.myStudents = data.myStudents || [];
+
+                // Render My Students for Attendance Marking
+                const facultyStudentList = document.getElementById('faculty-student-list');
+                if (facultyStudentList) facultyStudentList.innerHTML = window.myStudents.map(s => `
+                    <div class="flex items-center gap-3 bg-slate-900 p-3 rounded-lg border border-slate-700 hover:bg-slate-700/50 transition">
+                        <input type="checkbox" class="student-select-checkbox w-5 h-5 form-checkbox text-blue-500 bg-slate-800 border-slate-600 rounded focus:ring-blue-500" value="${s.id}" onclick="updateMarkButtons()">
+                        <div>
                             <p class="font-bold text-slate-100">${s.name}</p>
-                            <p class="text-xs text-slate-400">${s.course} (${s.branch})</p>
+                            <p class="text-xs text-slate-400">${s.course} | Username: ${s.username}</p>
                         </div>
                     </div>
-                `).join('') || '<p class="text-slate-500 text-center">No students assigned.</p>';
+                `).join('') || '<p class="text-slate-500 text-center">No students assigned to your batch.</p>';
 
-                updateBatchButtons(); // Initialize button state
+                // Render Attendance Log
+                const logF = document.getElementById('attendance-log-faculty');
+                if (logF) logF.innerHTML = data.attendance?.map(a => `
+                    <div class="flex justify-between bg-slate-900 p-2 rounded-lg border border-slate-700 text-sm">
+                        <span class="font-medium">${new Date(a.date).toLocaleDateString()}</span>
+                        <span class="${a.status === 'Present' ? 'text-green-400 font-semibold' : 'text-red-400 font-semibold'}">${a.status}</span>
+                    </div>
+                `).join('') || '<p class="text-slate-500 text-sm">No attendance records found.</p>';
+
+                // Initialize button state
                 document.getElementById('select-all-students').checked = false; // Reset select all checkbox
+                updateMarkButtons(); // Update buttons on load
 
             } else if (role === 'student') {
                 // Student logic (Fee Status, Attendance Log)
@@ -899,40 +926,96 @@
             }
         }
 
-        async function assignSelectedLeads() {
-            const checkboxes = document.querySelectorAll('#lead-list .lead-checkbox:checked');
-            const leadIds = Array.from(checkboxes).map(cb => cb.value);
-            const counselorId = document.getElementById('assign-counselor-select').value;
+        // --- Attendance & Geo-Location ---
 
-            if (leadIds.length === 0) return alert("Select at least one lead.");
-            if (!counselorId) return alert("Select a counselor.");
-
-            const res = await callAPI('assignLeads', { leadIds, counselorId });
-            if (res.status === 'success') {
-                alert(res.message || "Leads assigned successfully");
-                loadDashboardData();
+        function startAttendance_internal() {
+            if (EXTERNAL_ATTENDANCE_URL) {
+                // If External URL is provided, redirect/open the iframe modal
+                openAttendanceIframe();
             } else {
-                alert("Error assigning leads: " + res.message);
+                // Otherwise, use Geo-location (original function)
+                startAttendance();
             }
         }
 
-        // --- NEW FACULTY BATCH ATTENDANCE LOGIC ---
+        function openAttendanceIframe() {
+            if (!EXTERNAL_ATTENDANCE_URL) {
+                return alert("External Attendance URL is not configured.");
+            }
+            const modal = document.getElementById('attendance-modal');
+            const iframe = document.getElementById('attendance-iframe');
+            
+            // Construct the URL with user context if needed
+            // Example: iframe.src = `${EXTERNAL_ATTENDANCE_URL}?user=${currentUser.id}&role=${currentUser.role}`;
+            iframe.src = EXTERNAL_ATTENDANCE_URL; 
 
-        function updateBatchButtons() {
-            const checkboxes = document.querySelectorAll('.student-select-checkbox');
-            const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-            const disable = selectedCount === 0;
+            // Show the modal
+            modal.classList.remove('hidden');
 
-            document.getElementById('btn-mark-present').disabled = disable;
-            document.getElementById('btn-mark-absent').disabled = disable;
         }
 
-        function toggleSelectAll(checked) {
-            const checkboxes = document.querySelectorAll('.student-select-checkbox');
-            checkboxes.forEach(cb => {
-                cb.checked = checked;
+        function startAttendance() {
+            // Function for Geo-location based attendance (requires different client-side logic to get lat/lng)
+            // For now, this is replaced by openAttendanceIframe
+            alert("Attendance: Using Geo-location is disabled. Please configure EXTERNAL_ATTENDANCE_URL for time-in/time-out.");
+        }
+
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.add('hidden');
+                if (id === 'attendance-modal') {
+                    document.getElementById('attendance-iframe').src = ''; // Clear iframe source on close
+                }
+            }
+        }
+
+        // --- UI Helpers ---
+        function showTab(role, tabName) {
+            // Remove active state from all buttons in the tab container
+            document.querySelectorAll(`#dashboard-${role} .flex.space-x-4 button`).forEach(btn => {
+                btn.classList.remove('text-blue-400', 'border-blue-500', 'border-b-2');
+                btn.classList.add('text-slate-400', 'hover:text-white');
             });
-            updateBatchButtons();
+            // Set active state on the clicked button
+            const clickedButton = document.querySelector(`#dashboard-${role} button[onclick="showTab('${role}', '${tabName}')"]`);
+            if (clickedButton) {
+                clickedButton.classList.remove('text-slate-400', 'hover:text-white');
+                clickedButton.classList.add('text-blue-400', 'border-blue-500', 'border-b-2');
+            }
+            document.querySelectorAll(`#dashboard-${role} .tab-content`).forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`${role}-tab-${tabName}`);
+            if (target) target.classList.remove('hidden');
+        }
+
+        function assignSelectedLeads() {
+            const checkboxes = document.querySelectorAll('#lead-list .lead-checkbox:checked');
+            const leadIds = Array.from(checkboxes).map(cb => cb.value);
+            const counselorId = document.getElementById('assign-counselor-select').value;
+            const counselorName = document.getElementById('assign-counselor-select').options[document.getElementById('assign-counselor-select').selectedIndex].text;
+
+            if (leadIds.length === 0) return alert("Please select leads to assign.");
+            if (!counselorId) return alert("Please select a counselor.");
+
+            if (!confirm(`Are you sure you want to assign ${leadIds.length} leads to ${counselorName}?`)) return;
+
+            const payload = { leadIds, counselorId };
+            handleFormSubmit({ preventDefault: () => { } }, 'assignLeads', payload);
+        }
+
+        // --- Faculty Attendance ---
+
+        function toggleSelectAll(checked) {
+            document.querySelectorAll('.student-select-checkbox').forEach(cb => cb.checked = checked);
+            updateMarkButtons();
+        }
+
+        function updateMarkButtons() {
+            const count = document.querySelectorAll('.student-select-checkbox:checked').length;
+            const disable = count === 0;
+            document.getElementById('btn-mark-present').disabled = disable;
+            document.getElementById('btn-mark-absent').disabled = disable;
         }
 
         async function markSelectedStudents(status) {
