@@ -27,45 +27,6 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-
-        /* Mobile Sidebar Custom Styles */
-        .sidebar-drawer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 80%;
-            max-width: 300px;
-            z-index: 45;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
-        }
-
-        .sidebar-drawer.open {
-            transform: translateX(0);
-        }
-
-        /* Backdrop */
-        .sidebar-backdrop {
-            position: fixed;
-            inset: 0;
-            z-index: 40;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        /* Only show mobile layout on smaller screens */
-        @media (min-width: 768px) {
-            .sidebar-drawer,
-            .sidebar-backdrop,
-            .mobile-menu-btn {
-                display: none !important;
-            }
-
-            .dashboard-content-main {
-                display: block !important;
-            }
-        }
     </style>
 </head>
 
@@ -109,16 +70,7 @@
 
     <main id="app-container" class="hidden flex-1 flex flex-col">
         <nav class="bg-slate-800 border-b border-slate-700 px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <button onclick="toggleSidebar()"
-                    class="mobile-menu-btn md:hidden text-white p-1 rounded hover:bg-slate-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-                <div class="font-bold text-xl text-blue-500">CIMS</div>
-            </div>
+            <div class="font-bold text-xl text-blue-500">CIMS</div>
             <div class="flex items-center gap-4">
                 <div id="user-profile" class="flex items-center gap-3 hidden md:flex">
                     <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold"
@@ -129,34 +81,68 @@
             </div>
         </nav>
 
-        <div id="sidebar-backdrop" class="sidebar-backdrop hidden" onclick="toggleSidebar()"></div>
-        <div id="sidebar-drawer" class="sidebar-drawer bg-slate-800 md:hidden flex flex-col p-4 space-y-4 overflow-y-auto">
-            <h3 class="text-xl font-bold text-white border-b border-slate-700 pb-2">Navigation</h3>
-            <div id="sidebar-content">
-                </div>
-        </div>
-
         <div class="flex-1 p-4 md:p-6 overflow-y-auto">
 
             <div id="dashboard-boss" class="dashboard-view hidden space-y-6">
                 <h2 class="text-2xl font-bold text-white mb-6">Boss Dashboard</h2>
-                <div class="hidden md:flex space-x-4 border-b border-slate-700 pb-2 mb-4 overflow-x-auto">
-                    <button onclick="showTab('boss', 'staff', this)"
-                        class="px-4 py-2 text-blue-400 border-b-2 border-blue-500 focus:outline-none boss-tab-btn"
-                        data-tab-name="staff">Staff</button>
-                    <button onclick="showTab('boss', 'branches', this)"
-                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none boss-tab-btn"
-                        data-tab-name="branches">Branches</button>
-                    <button onclick="showTab('boss', 'leads', this)"
-                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none boss-tab-btn"
-                        data-tab-name="leads">Leads</button>
-                    <button onclick="showTab('boss', 'analytics', this)"
-                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none boss-tab-btn"
-                        data-tab-name="analytics">Analytics</button>
+                <div class="flex space-x-4 border-b border-slate-700 pb-2 mb-4 overflow-x-auto">
+                    <button onclick="showTab('boss', 'staff')"
+                        class="px-4 py-2 text-blue-400 border-b-2 border-blue-500 focus:outline-none">Staff</button>
+                    <button onclick="showTab('boss', 'branches')"
+                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none">Branches</button>
+                    <button onclick="showTab('boss', 'leads')"
+                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none">Leads</button>
+                    <button onclick="showTab('boss', 'analytics')"
+                        class="px-4 py-2 text-slate-400 hover:text-white focus:outline-none">Analytics</button>
                 </div>
 
-                <div id="boss-content-main" class="dashboard-content-main">
+                <div id="boss-tab-staff" class="tab-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">Staff Management</h3>
+                        <button onclick="openModal('add-staff-modal')"
+                            class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-bold transition">Add
+                            Staff</button>
                     </div>
+                    <div id="staff-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
+                        <p class="text-slate-400 text-center">Loading staff data...</p>
+                    </div>
+                </div>
+
+                <div id="boss-tab-branches" class="tab-content hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">Branch Locations</h3>
+                        <button onclick="openModal('add-branch-modal')"
+                            class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-bold transition">Add
+                            Branch</button>
+                    </div>
+                    <div id="branch-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
+                        <p class="text-slate-400 text-center">Loading branch data...</p>
+                    </div>
+                </div>
+
+                <div id="boss-tab-leads" class="tab-content hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">Lead Assignment</h3>
+                        <button onclick="assignSelectedLeads()"
+                            class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-bold transition">Assign
+                            Selected</button>
+                    </div>
+                    <div class="mb-4">
+                        <select id="assign-counselor-select"
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                            <option value="">Select Counselor to Assign</option>
+                        </select>
+                    </div>
+                    <div id="lead-list" class="bg-slate-800 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">
+                        <p class="text-slate-400 text-center">Loading leads...</p>
+                    </div>
+                </div>
+
+                <div id="boss-tab-analytics" class="tab-content hidden">
+                    <div class="bg-slate-800 p-6 rounded-lg text-center">
+                        <p class="text-slate-400">Analytics Module Coming Soon...</p>
+                    </div>
+                </div>
             </div>
 
             <div id="dashboard-counselor" class="dashboard-view hidden space-y-6">
@@ -172,47 +158,49 @@
                         class="p-4 bg-purple-600 rounded-lg hover:bg-purple-700 transition text-center font-bold">Mark
                         My Attendance</button>
                 </div>
-                <div id="counselor-content-main" class="dashboard-content-main">
-                    <div>
-                        <h3 class="text-xl font-semibold mb-4">My Leads</h3>
-                        <div id="counselor-lead-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
-                            <p class="text-slate-400 text-center">Loading leads...</p>
-                        </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">My Leads</h3>
+                    <div id="counselor-lead-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
+                        <p class="text-slate-400 text-center">Loading leads...</p>
                     </div>
+                </div>
 
-                    <div class="mt-8">
-                        <h3 class="text-xl font-semibold mb-4">Student Management</h3>
-                        <div class="mb-4">
-                            <input type="text" id="student-search" onkeyup="filterStudents()"
-                                placeholder="Search students by name..."
-                                class="w-full bg-slate-900 border border-slate-700 rounded px-4 py-2 text-white outline-none focus:border-blue-500">
-                        </div>
-                        <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-sm text-slate-400">
-                                    <thead class="bg-slate-900 text-slate-200 uppercase font-bold">
-                                        <tr>
-                                            <th class="px-4 py-3">Name</th>
-                                            <th class="px-4 py-3">Course</th>
-                                            <th class="px-4 py-3">Username</th>
-                                            <th class="px-4 py-3">Password</th>
-                                            <th class="px-4 py-3">Faculty</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="counselor-student-list" class="divide-y divide-slate-700">
-                                        <tr>
-                                            <td colspan="5" class="px-4 py-3 text-center">Loading
-                                                students...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                <div class="mt-8">
+                    <h3 class="text-xl font-semibold mb-4">Student Management</h3>
+                    <div class="mb-4">
+                        <input type="text" id="student-search" onkeyup="filterStudents()"
+                            placeholder="Search students by name..."
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-4 py-2 text-white outline-none focus:border-blue-500">
+                    </div>
+                    <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-400">
+                                <thead class="bg-slate-900 text-slate-200 uppercase font-bold">
+                                    <tr>
+                                        <th class="px-4 py-3">Name</th>
+                                        <th class="px-4 py-3">Course</th>
+                                        <th class="px-4 py-3">Username</th>
+                                        <th class="px-4 py-3">Password</th>
+                                        <th class="px-4 py-3">Faculty</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="counselor-student-list" class="divide-y divide-slate-700">
+                                    <tr>
+                                        <td colspan="5" class="px-4 py-3 text-center">Loading
+                                            students...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <div id="counselor-sidebar-content" class="md:hidden">
+                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
+                    <h3 class="text-lg font-bold text-green-400 mb-2">My Attendance History</h3>
+                    <div id="attendance-log-counselor" class="space-y-2 max-h-40 overflow-y-auto">
+                        <p class="text-slate-500 text-sm">Loading...</p>
                     </div>
+                </div>
             </div>
 
             <div id="dashboard-faculty" class="dashboard-view hidden space-y-6">
@@ -228,106 +216,39 @@
                         class="w-full px-6 py-3 bg-red-600 rounded-lg hover:bg-red-700 transition font-bold disabled:opacity-50 disabled:cursor-not-allowed">Mark
                         Selected Absent</button>
                 </div>
-                <div id="faculty-content-main" class="dashboard-content-main">
-                    <div>
-                        <h3 class="text-xl font-semibold mb-4">My Students</h3>
-                        <div class="flex items-center gap-4 mb-4">
-                            <input type="checkbox" id="select-all-students" onclick="toggleSelectAll(this.checked)"
-                                class="w-5 h-5">
-                            <label for="select-all-students" class="text-slate-300">Select All</label>
-                        </div>
-                        <div id="faculty-student-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
-                            <p class="text-slate-400 text-center">Loading students...</p>
-                        </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">My Students</h3>
+                    <div class="flex items-center gap-4 mb-4">
+                        <input type="checkbox" id="select-all-students" onclick="toggleSelectAll(this.checked)"
+                            class="w-5 h-5">
+                        <label for="select-all-students" class="text-slate-300">Select All</label>
+                    </div>
+                    <div id="faculty-student-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
+                        <p class="text-slate-400 text-center">Loading students...</p>
                     </div>
                 </div>
-
-                <div id="faculty-sidebar-content" class="md:hidden">
+                <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
+                    <h3 class="text-lg font-bold text-green-400 mb-2">My Attendance History</h3>
+                    <div id="attendance-log-faculty" class="space-y-2 max-h-40 overflow-y-auto">
+                        <p class="text-slate-500 text-sm">Loading...</p>
                     </div>
+                </div>
             </div>
 
             <div id="dashboard-student" class="dashboard-view hidden space-y-6">
                 <h2 class="text-2xl font-bold text-white mb-6">Student Dashboard</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div id="student-content-main">
-                        <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
-                            <h3 class="text-lg font-bold text-blue-400 mb-2">Fee Status</h3>
-                            <p class="text-3xl font-bold text-white">₹ <span id="student-fee-remaining">0</span></p>
-                            <p class="text-sm text-slate-400">Remaining Balance</p>
-                        </div>
+                    <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
+                        <h3 class="text-lg font-bold text-blue-400 mb-2">Fee Status</h3>
+                        <p class="text-3xl font-bold text-white">₹ <span id="student-fee-remaining">0</span></p>
+                        <p class="text-sm text-slate-400">Remaining Balance</p>
                     </div>
-                    <div id="student-sidebar-content" class="md:hidden">
-                        </div>
-
-                    <div class="hidden md:block bg-slate-800 p-6 rounded-lg border border-slate-700">
+                    <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
                         <h3 class="text-lg font-bold text-green-400 mb-2">Attendance</h3>
                         <div id="student-attendance-log" class="space-y-2 max-h-40 overflow-y-auto">
                             <p class="text-slate-500 text-sm">No records found.</p>
                         </div>
                     </div>
-
-                </div>
-            </div>
-
-            <div id="boss-tab-staff" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-semibold">Staff Management</h3>
-                    <button onclick="openModal('add-staff-modal')"
-                        class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-bold transition">Add
-                        Staff</button>
-                </div>
-                <div id="staff-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
-                    <p class="text-slate-400 text-center">Loading staff data...</p>
-                </div>
-            </div>
-
-            <div id="boss-tab-branches" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-semibold">Branch Locations</h3>
-                    <button onclick="openModal('add-branch-modal')"
-                        class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-bold transition">Add
-                        Branch</button>
-                </div>
-                <div id="branch-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
-                    <p class="text-slate-400 text-center">Loading branch data...</p>
-                </div>
-            </div>
-
-            <div id="boss-tab-leads" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-semibold">Lead Assignment</h3>
-                    <button onclick="assignSelectedLeads()"
-                        class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-bold transition">Assign
-                        Selected</button>
-                </div>
-                <div class="mb-4">
-                    <select id="assign-counselor-select"
-                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
-                        <option value="">Select Counselor to Assign</option>
-                    </select>
-                </div>
-                <div id="lead-list" class="bg-slate-800 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">
-                    <p class="text-slate-400 text-center">Loading leads...</p>
-                </div>
-            </div>
-
-            <div id="boss-tab-analytics" class="tab-content hidden">
-                <div class="bg-slate-800 p-6 rounded-lg text-center">
-                    <p class="text-slate-400">Analytics Module Coming Soon...</p>
-                </div>
-            </div>
-
-            <div id="my-attendance-log-container" class="bg-slate-800 p-6 rounded-lg border border-slate-700">
-                <h3 class="text-lg font-bold text-green-400 mb-2">My Attendance History</h3>
-                <div id="attendance-log-content" class="space-y-2 max-h-40 overflow-y-auto">
-                    <p class="text-slate-500 text-sm">Loading...</p>
-                </div>
-            </div>
-            
-            <div id="student-attendance-log-sidebar" class="bg-slate-800 p-6 rounded-lg border border-slate-700">
-                <h3 class="text-lg font-bold text-green-400 mb-2">Attendance History</h3>
-                <div id="attendance-log-student-content" class="space-y-2 max-h-40 overflow-y-auto">
-                    <p class="text-slate-500 text-sm">No records found.</p>
                 </div>
             </div>
 
@@ -678,50 +599,23 @@
 
         // --- UI Helpers ---
 
-        // NEW: Toggle Sidebar on Mobile
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar-drawer');
-            const backdrop = document.getElementById('sidebar-backdrop');
-            sidebar.classList.toggle('open');
-            backdrop.classList.toggle('hidden');
-        }
-
-
-        // UPDATED: Centralized function to show tab and manage content movement
-        function showTab(role, tabName, element = null) {
-            // Only for Boss (desktop tabs are needed)
-            if (role === 'boss') {
-                // Remove active state from all buttons in the tab container
-                document.querySelectorAll(`#dashboard-${role} .boss-tab-btn`).forEach(btn => {
-                    btn.classList.remove('text-blue-400', 'border-blue-500');
-                    btn.classList.add('text-slate-400', 'hover:text-white');
-                });
-                
-                // Set active state on the clicked button (desktop view only)
-                const clickedButton = element || document.querySelector(`#dashboard-${role} button[data-tab-name="${tabName}"]`);
-                if(clickedButton) {
-                    clickedButton.classList.remove('text-slate-400', 'hover:text-white');
-                    clickedButton.classList.add('text-blue-400', 'border-blue-500');
-                }
-                
-                // Move the actual content to the main container
-                const targetTabContent = document.getElementById(`${role}-tab-${tabName}`);
-                const mainContainer = document.getElementById(`${role}-content-main`);
-                
-                if (mainContainer && targetTabContent) {
-                    // 1. Clear main container
-                    mainContainer.innerHTML = ''; 
-                    // 2. Clone/Move content to the main container
-                    mainContainer.appendChild(targetTabContent.cloneNode(true));
-                    // 3. Ensure the active content is visible and inactive are hidden (in the main view)
-                    document.querySelectorAll(`#${role}-content-main .tab-content`).forEach(el => el.classList.remove('hidden'));
-                }
+        function showTab(role, tabName) {
+            // Remove active state from all buttons in the tab container
+            document.querySelectorAll(`#dashboard-${role} .flex.space-x-4 button`).forEach(btn => {
+                btn.classList.remove('text-blue-400', 'border-blue-500');
+                btn.classList.add('text-slate-400', 'hover:text-white');
+            });
+            
+            // Set active state on the clicked button
+            const clickedButton = document.querySelector(`#dashboard-${role} button[onclick="showTab('${role}', '${tabName}')"]`);
+            if(clickedButton) {
+                clickedButton.classList.remove('text-slate-400', 'hover:text-white');
+                clickedButton.classList.add('text-blue-400', 'border-blue-500');
             }
             
-            // For all roles (mobile sidebar selection)
-            if (role !== 'boss') {
-                toggleSidebar(); // Close sidebar after selecting an item
-            }
+            document.querySelectorAll(`#dashboard-${role} .tab-content`).forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`${role}-tab-${tabName}`);
+            if (target) target.classList.remove('hidden');
         }
 
         function openModal(id) {
@@ -795,15 +689,10 @@
             }
         }
 
-        // UPDATED: Modified renderDashboard to handle content movement and sidebar rendering
         function renderDashboard(data) {
             if (!data) return;
             const role = currentUser.role.toLowerCase();
-            const sidebarContent = document.getElementById('sidebar-content');
-            
-            // Clear sidebar
-            sidebarContent.innerHTML = '';
-            
+
             // Common: Populate Faculty Dropdown
             const facultySelect = document.getElementById('student-faculty-select');
             if (facultySelect && data.facultyList) {
@@ -813,34 +702,20 @@
 
             // Common: Render My Attendance Log (for non-students)
             if (role !== 'student') {
-                const attLogContent = document.getElementById('attendance-log-content');
-                
-                attLogContent.innerHTML = data.attendance?.map(a => `
-                    <div class="flex justify-between bg-slate-900 p-2 rounded border border-slate-700 text-sm">
-                        <span>${new Date(a.date).toLocaleString()}</span>
-                        <span class="${a.status === 'Present' ? 'text-green-400' : 'text-red-400'}">${a.status}</span>
-                    </div>
-                `).join('') || '<p class="text-slate-500 text-sm">No attendance records.</p>';
-                
-                // Move attendance log to the specific sidebar container for mobile view
-                const logContainer = document.getElementById('my-attendance-log-container').cloneNode(true);
-                logContainer.classList.remove('hidden');
-                logContainer.id = `sidebar-att-log`; // Change ID to prevent conflict
-                
-                if (role === 'counselor') {
-                    document.getElementById('counselor-sidebar-content').appendChild(logContainer);
-                } else if (role === 'faculty') {
-                    document.getElementById('faculty-sidebar-content').appendChild(logContainer);
+                const attLogId = `attendance-log-${role}`;
+                const attLog = document.getElementById(attLogId);
+                if (attLog) {
+                    attLog.innerHTML = data.attendance?.map(a => `
+                        <div class="flex justify-between bg-slate-900 p-2 rounded border border-slate-700 text-sm">
+                            <span>${new Date(a.date).toLocaleString()}</span>
+                            <span class="${a.status === 'Present' ? 'text-green-400' : 'text-red-400'}">${a.status}</span>
+                        </div>
+                    `).join('') || '<p class="text-slate-500 text-sm">No attendance records.</p>';
                 }
-                
-                // Hide the original container template
-                document.getElementById('my-attendance-log-container').classList.add('hidden');
             }
 
             if (role === 'boss') {
-                // Boss logic: Render all tab content containers first (for quick switching)
-                
-                // 1. Staff Tab Content
+                // Boss logic (Staff, Branches, Leads)
                 const staffList = document.getElementById('staff-list');
                 if (staffList) staffList.innerHTML = data.staff?.map(s => `
                     <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
@@ -850,8 +725,7 @@
                         </div>
                     </div>
                 `).join('') || '<p class="text-slate-500 text-center">No staff found.</p>';
-                
-                // 2. Branches Tab Content
+
                 const branchList = document.getElementById('branch-list');
                 if (branchList) branchList.innerHTML = data.branches?.map(b => `
                     <div class="bg-slate-900 p-3 rounded border border-slate-700">
@@ -860,7 +734,6 @@
                     </div>
                 `).join('') || '<p class="text-slate-500 text-center">No branches found.</p>';
 
-                // 3. Leads Tab Content
                 const leadList = document.getElementById('lead-list');
                 if (leadList) leadList.innerHTML = data.leads?.map(l => `
                     <div class="flex items-center gap-3 bg-slate-900 p-3 rounded border border-slate-700">
@@ -878,20 +751,9 @@
                     counselorSelect.innerHTML = '<option value="">Select Counselor to Assign</option>' +
                         counselors.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
                 }
-                
-                // Setup Mobile Sidebar: Show tab navigation items
-                sidebarContent.innerHTML = `
-                    <button onclick="showTab('boss', 'staff')" class="block w-full text-left p-3 rounded hover:bg-slate-700 text-blue-400 border-b border-slate-700">Staff Management</button>
-                    <button onclick="showTab('boss', 'branches')" class="block w-full text-left p-3 rounded hover:bg-slate-700 border-b border-slate-700">Branch Locations</button>
-                    <button onclick="showTab('boss', 'leads')" class="block w-full text-left p-3 rounded hover:bg-slate-700 border-b border-slate-700">Lead Assignment</button>
-                    <button onclick="showTab('boss', 'analytics')" class="block w-full text-left p-3 rounded hover:bg-slate-700">Analytics</button>
-                `;
-                
-                // Call showTab to render default content (Staff) to the main container
-                showTab('boss', 'staff');
 
             } else if (role === 'counselor') {
-                // Counselor logic
+                // Counselor logic (My Leads, All Students)
                 const list = document.getElementById('counselor-lead-list');
                 window.allLeads = data.myLeads; // Store leads globally for conversion logic
                 
@@ -925,15 +787,9 @@
                     `;
                     }).join('') || '<tr><td colspan="5" class="px-4 py-3 text-center">No students found.</td></tr>';
                 }
-                
-                // Counselor Mobile Sidebar
-                sidebarContent.innerHTML = `
-                    <p class="text-slate-400 font-semibold mb-2">My Information</p>
-                    ${document.getElementById('counselor-sidebar-content').innerHTML}
-                `;
 
             } else if (role === 'faculty') {
-                // Faculty logic
+                // Faculty logic (My Students, Batch Attendance)
                 const list = document.getElementById('faculty-student-list');
                 if (list) list.innerHTML = data.myStudents?.map(s => `
                     <div class="flex items-center gap-3 bg-slate-900 p-3 rounded border border-slate-700 faculty-student-row">
@@ -947,36 +803,19 @@
                 
                 updateBatchButtons(); // Initialize button state
                 document.getElementById('select-all-students').checked = false; // Reset select all checkbox
-                
-                // Faculty Mobile Sidebar
-                sidebarContent.innerHTML = `
-                    <p class="text-slate-400 font-semibold mb-2">My Information</p>
-                    ${document.getElementById('faculty-sidebar-content').innerHTML}
-                `;
 
             } else if (role === 'student') {
-                // Student logic
+                // Student logic (Fee Status, Attendance Log)
                 const feeEl = document.getElementById('student-fee-remaining');
                 if (feeEl) feeEl.innerText = data.feeRemaining || 0;
 
                 const log = document.getElementById('student-attendance-log');
-                const logSidebar = document.getElementById('attendance-log-student-content');
-                
-                const attendanceHtml = data.attendance?.map(a => `
+                if (log) log.innerHTML = data.attendance?.map(a => `
                     <div class="flex justify-between bg-slate-900 p-2 rounded border border-slate-700 text-sm">
                         <span>${new Date(a.date).toLocaleDateString()}</span>
                         <span class="${a.status === 'Present' ? 'text-green-400' : 'text-red-400'}">${a.status}</span>
                     </div>
                 `).join('') || '<p class="text-slate-500 text-sm">No records found.</p>';
-                
-                if (log) log.innerHTML = attendanceHtml;
-                if (logSidebar) logSidebar.innerHTML = attendanceHtml;
-                
-                // Student Mobile Sidebar
-                sidebarContent.innerHTML = `
-                    <p class="text-slate-400 font-semibold mb-2">My Information</p>
-                    ${document.getElementById('student-sidebar-content').innerHTML}
-                `;
             }
         }
 
