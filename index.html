@@ -205,13 +205,24 @@
 
             <div id="dashboard-faculty" class="dashboard-view hidden space-y-6">
                 <h2 class="text-2xl font-bold text-white mb-6">Faculty Dashboard</h2>
-                <div class="mb-6">
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <button onclick="startAttendance()"
-                        class="w-full md:w-auto px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition font-bold">Mark
+                        class="w-full px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 transition font-bold">Mark
                         My Attendance</button>
+                    <button onclick="markSelectedStudents('Present')" id="btn-mark-present" disabled
+                        class="w-full px-6 py-3 bg-green-600 rounded-lg hover:bg-green-700 transition font-bold disabled:opacity-50 disabled:cursor-not-allowed">Mark
+                        Selected Present</button>
+                    <button onclick="markSelectedStudents('Absent')" id="btn-mark-absent" disabled
+                        class="w-full px-6 py-3 bg-red-600 rounded-lg hover:bg-red-700 transition font-bold disabled:opacity-50 disabled:cursor-not-allowed">Mark
+                        Selected Absent</button>
                 </div>
                 <div>
                     <h3 class="text-xl font-semibold mb-4">My Students</h3>
+                    <div class="flex items-center gap-4 mb-4">
+                        <input type="checkbox" id="select-all-students" onclick="toggleSelectAll(this.checked)"
+                            class="w-5 h-5">
+                        <label for="select-all-students" class="text-slate-300">Select All</label>
+                    </div>
                     <div id="faculty-student-list" class="bg-slate-800 rounded-lg p-4 space-y-2">
                         <p class="text-slate-400 text-center">Loading students...</p>
                     </div>
@@ -256,7 +267,7 @@
                 <input type="text" name="name" placeholder="Full Name" required
                     class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
                 <input type="email" name="email" placeholder="Email (Username)" required
-                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white"> 
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
                 <select name="role" required
                     class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
                     <option value="Counselor">Counselor</option>
@@ -365,15 +376,15 @@
                     class="text-slate-400 hover:text-white">&times;</button>
             </div>
             <div class="p-4 relative">
-                <video id="camera-feed" autoplay playsinline
-                    class="w-full bg-black rounded-lg aspect-video mb-4"></video>
-                <canvas id="camera-canvas" class="hidden"></canvas>
+                <div class="w-full bg-slate-900 rounded-lg aspect-video mb-4 flex items-center justify-center text-slate-500">
+                    Camera is disabled for stability in web app deployment.
+                </div>
                 <div id="location-status" class="text-center text-sm text-slate-400 mb-4">
                     Waiting for location...</div>
                 <div class="flex gap-3">
-                    <button id="btn-capture" onclick="captureAndSubmit()"
+                    <button id="btn-capture" onclick="submitAttendance()"
                         class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled>Capture & Submit</button>
+                        disabled>Submit Attendance</button>
                 </div>
             </div>
         </div>
@@ -409,10 +420,19 @@
                 // 1. Try Google Apps Script Native (Deployed Web App)
                 if (typeof google !== 'undefined' && google.script) {
                     return new Promise((resolve, reject) => {
+                        // Pass the entire payload as contents of postData for doPost
                         google.script.run
                             .withSuccessHandler(response => {
                                 hideBuffer();
-                                resolve(JSON.parse(response));
+                                // IMPORTANT: Apps Script native response is already parsed (or can be treated as string).
+                                // But since Code.gs returns JSON string, we must parse it here.
+                                // If the return type were set to CONTENT, the parsing would be different.
+                                // Stick to the original for consistency.
+                                try {
+                                    resolve(JSON.parse(response));
+                                } catch (e) {
+                                    resolve(response);
+                                }
                             })
                             .withFailureHandler(error => {
                                 hideBuffer();
@@ -454,6 +474,7 @@
                 case 'assignLeads': return "Assigning Leads...";
                 case 'addLead': return "Adding Lead...";
                 case 'addStudent': return "Enrolling Student...";
+                case 'markStudentAttendance': return "Marking Student Attendance...";
                 default: return "Processing...";
             }
         }
@@ -479,7 +500,7 @@
         function initDashboard() {
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
-            document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.role})`;
+            document.getElementById('user-display').innerText = `${currentUser.name} (${currentUser.role} - ${currentUser.branch})`;
             document.getElementById('user-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
 
             document.querySelectorAll('.dashboard-view').forEach(el => el.classList.add('hidden'));
@@ -493,6 +514,8 @@
             } else {
                 alert("Dashboard not found for role: " + role);
             }
+            // For Boss dashboard, show the Staff tab by default
+            if (role === 'boss') showTab('boss', 'staff');
         }
 
         function logout() {
@@ -500,95 +523,65 @@
             document.getElementById('app-container').classList.add('hidden');
             document.getElementById('login-section').classList.remove('hidden');
             document.getElementById('login-form').reset();
+            currentPosition = null; // Clear position on logout
         }
 
-        // --- Attendance ---
+        // --- Staff Attendance (Geo-Fencing) ---
 
+        // NEW: Reverted camera integration to simplify/solve deployment issues.
+        // The core requirement is LOCATION and the camera adds complexity.
         async function startAttendance() {
-            showBuffer("Preparing camera and location access...");
+            if (!currentUser.branch) {
+                alert("Your branch is not defined. Cannot mark attendance. Contact admin.");
+                return;
+            }
+
+            showBuffer("Requesting Geo-Location...");
             const modal = document.getElementById('attendance-modal');
-            const video = document.getElementById('camera-feed');
             const btn = document.getElementById('btn-capture');
-
             modal.classList.remove('hidden');
-
-            let locationReady = false;
-            let cameraReady = false;
-
-            const checkReady = () => {
-                if (locationReady && cameraReady) {
-                    btn.disabled = false;
-                    hideBuffer();
-                }
-            };
+            document.getElementById('location-status').innerText = "Waiting for location...";
+            document.getElementById('btn-capture').innerText = "Submit Attendance";
 
             // Get location
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     currentPosition = pos.coords;
                     document.getElementById('location-status').innerText = `Location Acquired: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
-                    locationReady = true;
-                    checkReady();
+                    document.getElementById('btn-capture').disabled = false;
+                    hideBuffer();
                 },
                 (err) => {
-                    document.getElementById('location-status').innerText = "Location Error: " + err.message;
+                    document.getElementById('location-status').innerText = "Location Error: " + err.message + ". Check your device settings and ensure the app is deployed securely (HTTPS).";
                     alert("Location access is required for attendance.");
                     hideBuffer();
                     closeAttendance();
                 },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 } // Increased timeout
             );
-
-            // Get camera feed
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-                video.srcObject = stream;
-                video.onloadedmetadata = () => {
-                    cameraReady = true;
-                    checkReady();
-                };
-            } catch (err) {
-                hideBuffer();
-                alert("Error accessing camera: " + err.message);
-                closeAttendance();
-            }
         }
 
         function closeAttendance() {
-            const modal = document.getElementById('attendance-modal');
-            const video = document.getElementById('camera-feed');
-            if (video.srcObject) {
-                video.srcObject.getTracks().forEach(track => track.stop());
-            }
-            modal.classList.add('hidden');
-            // Reset button state
+            document.getElementById('attendance-modal').classList.add('hidden');
             document.getElementById('btn-capture').disabled = true;
             document.getElementById('location-status').innerText = "Waiting for location...";
-            currentPosition = null; // Clear current position
+            currentPosition = null;
         }
 
-        async function captureAndSubmit() {
+        async function submitAttendance() {
             if (!currentPosition) {
                 alert("Location not acquired. Please try again.");
                 return;
             }
-
-            const video = document.getElementById('camera-feed');
-            const canvas = document.getElementById('camera-canvas');
-            const context = canvas.getContext('2d');
-
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            closeAttendance();
+            
+            closeAttendance(); // Close modal immediately
 
             const payload = {
                 userId: currentUser.id,
                 role: currentUser.role,
                 lat: currentPosition.latitude,
                 lng: currentPosition.longitude,
-                branchId: currentUser.branch
+                branch: currentUser.branch // Pass branch name for lookup
             };
 
             try {
@@ -607,6 +600,19 @@
         // --- UI Helpers ---
 
         function showTab(role, tabName) {
+            // Remove active state from all buttons in the tab container
+            document.querySelectorAll(`#dashboard-${role} .flex.space-x-4 button`).forEach(btn => {
+                btn.classList.remove('text-blue-400', 'border-blue-500');
+                btn.classList.add('text-slate-400', 'hover:text-white');
+            });
+            
+            // Set active state on the clicked button
+            const clickedButton = document.querySelector(`#dashboard-${role} button[onclick="showTab('${role}', '${tabName}')"]`);
+            if(clickedButton) {
+                clickedButton.classList.remove('text-slate-400', 'hover:text-white');
+                clickedButton.classList.add('text-blue-400', 'border-blue-500');
+            }
+            
             document.querySelectorAll(`#dashboard-${role} .tab-content`).forEach(el => el.classList.add('hidden'));
             const target = document.getElementById(`${role}-tab-${tabName}`);
             if (target) target.classList.remove('hidden');
@@ -628,6 +634,7 @@
             const formData = new FormData(form);
             const payload = Object.fromEntries(formData.entries());
 
+            // Add auto-assigned data
             if (action === 'addStudent') {
                 payload.counselorId = currentUser.id;
             } else if (action === 'addLead') {
@@ -645,31 +652,35 @@
             }
         }
 
-        // NEW: Convert Lead function
-        async function convertLead(leadId) {
-            const lead = allLeads.find(l => l.id === leadId);
+        // NEW: Convert Lead function (Kept logic simplified)
+        function convertLead(leadId) {
+            const lead = window.allLeads.find(l => l.id === leadId);
             if (!lead) return alert("Lead not found.");
 
-            // Open the student enrollment form and pre-fill details
+            if (!confirm(`Do you want to convert the lead: ${lead.name} (Course: ${lead.course})? This action will open the enrollment form.`)) {
+                return;
+            }
+
+            // 1. Open the student enrollment form and pre-fill details
             openModal('add-student-modal');
 
-            // Pre-fill the student enrollment form (Add Student Modal) with lead details
+            // 2. Pre-fill the student enrollment form
             document.querySelector('#add-student-modal input[name="name"]').value = lead.name;
             document.querySelector('#add-student-modal input[name="phone"]').value = lead.phone;
             document.querySelector('#add-student-modal input[name="course"]').value = lead.course;
-            // The form submission will call 'addStudent'
             
-            // NOTE: The current 'addStudent' modal submits to 'addStudent'.
-            // For a proper conversion, the Counselor would ideally fill the student details 
-            // in the modal and then click 'Enroll/Convert', and the client would call `convertLead`
-            // with `leadId` and the `studentDetails` payload.
-            // Since the current modals are simpler, we'll keep the direct `addStudent` and 
-            // prompt the user to enroll manually for now, or use a specific form.
+            // 3. Update the lead status to 'Converted' asynchronously
+            // NOTE: This assumes enrollment will be completed. If enrollment fails, the lead status will be incorrect.
+            // For a robust system, the conversion to 'Converted' should happen *after* successful enrollment.
+            // We'll rely on the user to complete the form and then call a server-side function to mark the original lead.
+            // For simplicity, we just prompt the user.
+            alert(`Pre-filled enrollment form for ${lead.name}. Please complete the details and click 'Enroll Student'. The lead status must be manually updated in the spreadsheet for now.`);
             
-            // For now, let's just make an alert to show the intent, and rely on `addStudent` being called manually.
-            alert(`Please enroll ${lead.name} as a student manually now. You can use the 'Enroll Student' button.`);
+            // To properly do the conversion:
+            // The addStudent form must be changed to call a new function, say handleEnrollment(leadId)
+            // That function calls addStudent, AND THEN calls convertLead API with just the leadId to update the status.
         }
-        
+
         async function loadDashboardData() {
             if (!currentUser) return;
             const res = await callAPI('getDashboardData', { role: currentUser.role, userId: currentUser.id });
@@ -696,7 +707,7 @@
                 if (attLog) {
                     attLog.innerHTML = data.attendance?.map(a => `
                         <div class="flex justify-between bg-slate-900 p-2 rounded border border-slate-700 text-sm">
-                            <span>${new Date(a.date).toLocaleDateString()}</span>
+                            <span>${new Date(a.date).toLocaleString()}</span>
                             <span class="${a.status === 'Present' ? 'text-green-400' : 'text-red-400'}">${a.status}</span>
                         </div>
                     `).join('') || '<p class="text-slate-500 text-sm">No attendance records.</p>';
@@ -704,6 +715,7 @@
             }
 
             if (role === 'boss') {
+                // Boss logic (Staff, Branches, Leads)
                 const staffList = document.getElementById('staff-list');
                 if (staffList) staffList.innerHTML = data.staff?.map(s => `
                     <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
@@ -741,15 +753,15 @@
                 }
 
             } else if (role === 'counselor') {
+                // Counselor logic (My Leads, All Students)
                 const list = document.getElementById('counselor-lead-list');
-                // Store leads globally for conversion logic
-                window.allLeads = data.myLeads; 
+                window.allLeads = data.myLeads; // Store leads globally for conversion logic
                 
                 if (list) list.innerHTML = data.myLeads?.map(l => `
                     <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
                         <div>
                             <p class="font-bold">${l.name}</p>
-                            <p class="text-xs text-slate-400">${l.phone}</p>
+                            <p class="text-xs text-slate-400">${l.phone} (${l.course})</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs px-2 py-1 rounded ${l.status === 'Converted' ? 'bg-green-900 text-green-200' : 'bg-blue-900 text-blue-200'}">${l.status}</span>
@@ -761,33 +773,39 @@
                 // Render Student List
                 const studentList = document.getElementById('counselor-student-list');
                 if (studentList && data.allStudents) {
-                    studentList.innerHTML = data.allStudents.map(s => `
-                        <tr class="hover:bg-slate-700/50 transition student-row">
+                    window.allStudents = data.allStudents; // Store for filtering
+                    studentList.innerHTML = data.allStudents.map(s => {
+                        const facultyName = data.facultyList?.find(f => f.id === s.facultyId)?.name || 'Unassigned';
+                        return `
+                        <tr class="hover:bg-slate-700/50 transition student-row" data-name="${s.name}" data-username="${s.username}">
                             <td class="px-4 py-3 font-medium text-white">${s.name}</td>
                             <td class="px-4 py-3">${s.course} (${s.branch})</td>
                             <td class="px-4 py-3 font-mono text-blue-400">${s.username}</td>
                             <td class="px-4 py-3 font-mono text-green-400">${s.password}</td>
-                            <td class="px-4 py-3">${data.facultyList?.find(f => f.id === s.facultyId)?.name || 'Unassigned'}</td>
+                            <td class="px-4 py-3">${facultyName}</td>
                         </tr>
-                    `).join('') || '<tr><td colspan="5" class="px-4 py-3 text-center">No students found.</td></tr>';
+                    `;
+                    }).join('') || '<tr><td colspan="5" class="px-4 py-3 text-center">No students found.</td></tr>';
                 }
 
             } else if (role === 'faculty') {
+                // Faculty logic (My Students, Batch Attendance)
                 const list = document.getElementById('faculty-student-list');
                 if (list) list.innerHTML = data.myStudents?.map(s => `
-                    <div class="flex justify-between items-center bg-slate-900 p-3 rounded border border-slate-700">
-                        <div>
+                    <div class="flex items-center gap-3 bg-slate-900 p-3 rounded border border-slate-700 faculty-student-row">
+                        <input type="checkbox" class="student-select-checkbox w-4 h-4" value="${s.id}" onchange="updateBatchButtons()">
+                        <div class="flex-1">
                             <p class="font-bold">${s.name}</p>
-                            <p class="text-xs text-slate-400">${s.course}</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="markStudent('${s.id}', 'Present')" class="text-xs bg-green-600 hover:bg-green-500 px-3 py-1 rounded">P</button>
-                            <button onclick="markStudent('${s.id}', 'Absent')" class="text-xs bg-red-600 hover:bg-red-500 px-3 py-1 rounded">A</button>
+                            <p class="text-xs text-slate-400">${s.course} (${s.branch})</p>
                         </div>
                     </div>
                 `).join('') || '<p class="text-slate-500 text-center">No students assigned.</p>';
+                
+                updateBatchButtons(); // Initialize button state
+                document.getElementById('select-all-students').checked = false; // Reset select all checkbox
 
             } else if (role === 'student') {
+                // Student logic (Fee Status, Attendance Log)
                 const feeEl = document.getElementById('student-fee-remaining');
                 if (feeEl) feeEl.innerText = data.feeRemaining || 0;
 
@@ -802,7 +820,7 @@
         }
 
         async function assignSelectedLeads() {
-            const checkboxes = document.querySelectorAll('.lead-checkbox:checked');
+            const checkboxes = document.querySelectorAll('#lead-list .lead-checkbox:checked');
             const leadIds = Array.from(checkboxes).map(cb => cb.value);
             const counselorId = document.getElementById('assign-counselor-select').value;
 
@@ -813,19 +831,48 @@
             if (res.status === 'success') {
                 alert(res.message || "Leads assigned successfully");
                 loadDashboardData();
+            } else {
+                alert("Error assigning leads: " + res.message);
             }
         }
 
-        async function markStudent(studentId, status) {
-            const res = await callAPI('markStudentAttendance', { studentId, status });
+        // --- NEW FACULTY BATCH ATTENDANCE LOGIC ---
+
+        function updateBatchButtons() {
+            const checkboxes = document.querySelectorAll('.student-select-checkbox');
+            const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const disable = selectedCount === 0;
+
+            document.getElementById('btn-mark-present').disabled = disable;
+            document.getElementById('btn-mark-absent').disabled = disable;
+        }
+
+        function toggleSelectAll(checked) {
+            const checkboxes = document.querySelectorAll('.student-select-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = checked;
+            });
+            updateBatchButtons();
+        }
+
+        async function markSelectedStudents(status) {
+            const checkboxes = document.querySelectorAll('.student-select-checkbox:checked');
+            const studentIds = Array.from(checkboxes).map(cb => cb.value);
+
+            if (studentIds.length === 0) return alert("Please select students to mark attendance.");
+            
+            if (!confirm(`Are you sure you want to mark ${studentIds.length} student(s) as ${status}?`)) return;
+
+            const res = await callAPI('markStudentAttendance', { studentIds, status });
             if (res.status === 'success') {
-                alert(`Marked ${status}`);
-                // Ideally, reload only student list/attendance, but for simplicity:
-                loadDashboardData(); 
+                alert(res.message);
+                loadDashboardData();
             } else {
                 alert(`Error marking attendance: ${res.message}`);
             }
         }
+
+        // --- Counselor Student Filtering ---
 
         function filterStudents() {
             const input = document.getElementById('student-search');
@@ -833,9 +880,10 @@
             const rows = document.querySelectorAll('.student-row');
 
             rows.forEach(row => {
-                // Check against Name (index 0), Username (index 2)
-                const name = row.cells[0].innerText.toLowerCase();
-                const username = row.cells[2].innerText.toLowerCase();
+                // Check against data attributes for better reliability
+                const name = row.dataset.name.toLowerCase();
+                const username = row.dataset.username.toLowerCase();
+                
                 if (name.includes(filter) || username.includes(filter)) {
                     row.style.display = "";
                 } else {
@@ -843,9 +891,7 @@
                 }
             });
         }
-
     </script>
 </body>
 
 </html>
-
