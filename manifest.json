@@ -1,8 +1,8 @@
 {
     "name": "Creatix Institute Management System",
-    "short_name": "CIMS",
+    "short_name": "Creatix ",
     "description": "Institute management system for staff and students.",
-    "start_url": "/index.html",
+    "start_url": "/",
     "display": "standalone",
     "orientation": "portrait",
     "background_color": "#0f172a",
