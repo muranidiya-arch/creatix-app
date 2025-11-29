@@ -4,8 +4,7 @@ const CACHE_NAME = 'cims-cache-v1';
 const urlsToCache = [
     '/',
     '/index.html',
-    '/manifest.json',
-    'https://cdn.tailwindcss.com'
+    '/manifest.json'
 ];
 
 // Installation: Caches the initial assets
