@@ -1,21 +1,28 @@
 {
-  "name": "Creatix App",
-  "short_name": "Creatix",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+    "name": "Creatix Institute Management System",
+    "short_name": "CIMS",
+    "description": "Institute management system for staff and students.",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#0f172a",
+    "theme_color": "#1e293b",
+    "icons": [
+        {
+            "src": "Creatix.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "Creatix.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "Creatix.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
 }
