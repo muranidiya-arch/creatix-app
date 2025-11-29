@@ -28,30 +28,6 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
     </style>
-
-    <!-- PWA Manifest & Theme Color -->
-    <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#ffffff" />
-
-    <!-- iOS Support -->
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-
-    <!-- Service Worker Registration -->
-    <script>
-        // Ensure Service Worker registration only runs after the page has fully loaded
-        window.onload = function() {
-            if ("serviceWorker" in navigator) {
-                // Use absolute path to ensure correct URL resolution in complex environments
-                navigator.serviceWorker.register("/service-worker.js").then(registration => {
-                    console.log('Service Worker registered with scope:', registration.scope);
-                }).catch(error => {
-                    console.error('Service Worker registration failed:', error);
-                });
-            }
-        };
-    </script>
 </head>
 
 <body class="bg-slate-900 text-white font-sans antialiased min-h-screen flex flex-col">
