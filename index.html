@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Creatix Institute Management System</title>
-    <!-- PWA: Link Manifest File -->
     <link rel="manifest" href="./manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -493,10 +492,34 @@
         let currentPosition = null;
         // Global variables to store all student/fee data for lookup
         window.allStudentsData = [];
+        
+        // NEW: Placeholder for silent login credentials loaded from Local Storage
+        let savedCredentials = JSON.parse(localStorage.getItem('cimsCreds')) || null;
 
         // --- Configuration ---
         // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL FOR LOCAL TESTING
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwnRo9Kr08wSrphW-47eBY7GTPSzDIptOw1Pk5fmwdB7OOmlqDFW2Q1vcELYW2xwTuCFQ/exec";
+
+        // NEW: Cross-Tab Session Synchronization
+        function handleCrossTabLogin(event) {
+            // Only care about changes to our saved credentials key in Local Storage
+            if (event.key === 'cimsCreds' && event.newValue !== event.oldValue) {
+                // If a change occurs in another tab, force a page reload to re-run the 
+                // checkAndRestoreSession() logic and synchronize the current tab.
+                if (event.newValue === null) {
+                    // Logout triggered in another tab
+                    alert("You were logged out in another tab.");
+                } else if (event.newValue !== null && currentUser === null) {
+                    // Login triggered in another tab
+                    // Check if current user is logged in, if not, we must reload to perform silent login
+                    alert("Session detected in another tab. Syncing...");
+                }
+                // Force reload to sync session state with the last action taken in any tab
+                window.location.reload(); 
+            }
+        }
+        window.addEventListener('storage', handleCrossTabLogin);
+
 
         // NEW FUNCTION: Toggle Password Visibility
         function togglePasswordVisibility() {
@@ -618,6 +641,9 @@
                 const res = await callAPI('login', { username, password });
                 if (res.status === 'success') {
                     currentUser = res.user;
+                    // NEW: Save credentials to Local Storage for silent re-login
+                    savedCredentials = { username, password };
+                    localStorage.setItem('cimsCreds', JSON.stringify(savedCredentials));
                     initDashboard();
                 } else {
                     // Use custom modal/alert replacement instead of native alert()
@@ -650,6 +676,10 @@
 
         function logout() {
             currentUser = null;
+            // NEW: Clear credentials from Local Storage on manual logout
+            localStorage.removeItem('cimsCreds');
+            savedCredentials = null;
+
             document.getElementById('app-container').classList.add('hidden');
             document.getElementById('login-section').classList.remove('hidden');
             document.getElementById('login-form').reset();
@@ -679,9 +709,50 @@
                 alert(res.message || 'Password updated successfully!');
                 document.getElementById('change-password-modal').classList.add('hidden');
                 document.querySelector('#change-password-modal form').reset();
+                
+                // CRUCIAL: Since the password changed, we must update the stored credentials
+                // This ensures the next silent re-login attempt uses the NEW password.
+                if (savedCredentials) {
+                    savedCredentials.password = newPassword;
+                    localStorage.setItem('cimsCreds', JSON.stringify(savedCredentials));
+                }
+
             } else {
                 alert('Error changing password: ' + res.message);
             }
+        }
+
+
+        // NEW FUNCTION: Check for saved credentials and attempt silent login
+        async function checkAndRestoreSession() {
+            // 1. If currentUser is already set, we're already logged in (e.g., after initial manual login)
+            if (currentUser) {
+                return initDashboard();
+            }
+            
+            // 2. Check for saved credentials for silent re-login
+            if (savedCredentials) {
+                // Pre-fill the login form for visual quick-sync, though submission is silent
+                document.getElementById('username').value = savedCredentials.username;
+                
+                showBuffer("Restoring Session...");
+                // Perform silent login using stored username/password
+                const res = await callAPI('login', savedCredentials); 
+                
+                if (res.status === 'success') {
+                    currentUser = res.user;
+                    initDashboard();
+                } else {
+                    // Password mismatch or user deleted (The core requirement is met here!)
+                    alert("Your session expired or your credentials have been changed. Please log in again.");
+                    localStorage.removeItem('cimsCreds'); // Invalidate stale credentials
+                    savedCredentials = null;
+                    // Reset the form after failure to clear the pre-filled username (for security)
+                    document.getElementById('login-form').reset(); 
+                    hideBuffer();
+                }
+            }
+            // If no session and no saved credentials, the login form remains visible.
         }
 
 
@@ -1231,8 +1302,10 @@
                 }
             });
         }
+        
+        // FINAL CALL: Check and restore session on page load
+        checkAndRestoreSession();
     </script>
 </body>
 
 </html>
-
