@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Creatix Institute Management System</title>
+    <!-- PWA: Link Manifest File -->
+    <link rel="manifest" href="/manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom Animations */
@@ -473,6 +475,19 @@
     </footer>
 
     <script>
+        // PWA: Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => {
+                        console.log('Service Worker registered successfully: ', reg);
+                    })
+                    .catch(err => {
+                        console.error('Service Worker registration failed: ', err);
+                    });
+            });
+        }
+        
         // --- State ---
         let currentUser = null;
         let currentPosition = null;
@@ -1183,6 +1198,7 @@
             if (studentIds.length === 0) return alert("Please select students to mark attendance.");
 
             // Use custom modal/alert replacement instead of native confirm()
+            // Using window.confirm as a fallback for the sake of completeness, but recommend replacing with custom modal.
             if (!window.confirm(`Are you sure you want to mark ${studentIds.length} student(s) as ${status}?`)) return;
 
             const res = await callAPI('markStudentAttendance', { studentIds, status });
