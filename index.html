@@ -33,6 +33,7 @@
 
 <body class="bg-slate-900 text-white font-sans antialiased min-h-screen flex flex-col">
 
+    <!-- Loading Buffer (Modal Replacement) -->
     <div id="cool-buffer"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
         <div class="text-center">
@@ -43,6 +44,7 @@
         </div>
     </div>
 
+    <!-- Login Section -->
     <section id="login-section" class="flex items-center justify-center flex-1 p-4">
         <div class="w-full max-w-md bg-slate-800 rounded-2xl shadow-2xl p-8 border border-slate-700">
             <div class="text-center mb-8">
@@ -79,6 +81,7 @@
         </div>
     </section>
 
+    <!-- App Container (Hidden until login) -->
     <main id="app-container" class="hidden flex-1 flex flex-col">
         <nav class="bg-slate-800 border-b border-slate-700 px-4 py-3 flex justify-between items-center">
             <div class="font-bold text-xl text-blue-500">CIMS</div>
@@ -98,6 +101,7 @@
 
         <div class="flex-1 p-4 md:p-6 overflow-y-auto">
 
+            <!-- Boss Dashboard -->
             <div id="dashboard-boss" class="dashboard-view hidden space-y-6">
                 <h2 class="text-2xl font-bold text-white mb-6">Boss Dashboard</h2>
                 <div class="flex space-x-4 border-b border-slate-700 pb-2 mb-4 overflow-x-auto">
@@ -185,6 +189,7 @@
                 </div>
             </div>
 
+            <!-- Counselor Dashboard -->
             <div id="dashboard-counselor" class="dashboard-view hidden space-y-6">
                 <h2 class="text-2xl font-bold text-white mb-6">Counselor Dashboard</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -235,6 +240,7 @@
                 </div>
             </div>
 
+            <!-- Faculty Dashboard -->
             <div id="dashboard-faculty" class="dashboard-view hidden space-y-6">
                 <h2 class="text-2xl font-bold text-white mb-6">Faculty Dashboard</h2>
                 <div class="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -258,6 +264,7 @@
                 </div>
                 </div>
 
+            <!-- Student Dashboard -->
             <div id="dashboard-student" class="dashboard-view hidden space-y-6">
                 <h2 class="text-2xl font-bold text-white mb-6">Student Dashboard</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -278,6 +285,7 @@
         </div>
     </main>
 
+    <!-- Modals (Hidden) -->
     <div id="edit-fee-modal" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4">
         <div class="bg-slate-800 rounded-xl w-full max-w-md p-6 border border-slate-700">
             <div class="flex justify-between items-center mb-4">
@@ -493,51 +501,61 @@
         // Global variables to store all student/fee data for lookup
         window.allStudentsData = [];
         
-        // NEW: Placeholder for silent login credentials loaded from Local Storage
-        // MODIFIED: savedCredentials is now updated asynchronously when IDB read completes.
+        // Placeholder for silent login credentials loaded from IndexedDB
         let savedCredentials = null; 
 
         // --- Configuration ---
         // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL FOR LOCAL TESTING
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwnRo9Kr08wSrphW-47eBY7GTPSzDIptOw1Pk5fmwdB7OOmlqDFW2Q1vcELYW2xwTuCFQ/exec";
         
-        // --- IndexedDB Wrapper for key-value storage (replaces localStorage) ---
+        // --- IndexedDB Wrapper for key-value storage (REPLACEMENT FOR LOCAL STORAGE) ---
         const IDB_STORE = {
             dbName: 'CIMS_DB',
             storeName: 'sessionStore',
             key: 'cimsCreds', // Key to store the credentials object
 
+            // Helper to open the database and ensure the object store exists
             _getDB: function() {
                 return new Promise((resolve, reject) => {
+                    // Open the database with version 1
                     const request = indexedDB.open(this.dbName, 1);
 
+                    // This runs only when the DB is first created or the version number is incremented
                     request.onupgradeneeded = function(event) {
                         const db = event.target.result;
                         if (!db.objectStoreNames.contains(IDB_STORE.storeName)) {
+                            // Create the object store
                             db.createObjectStore(IDB_STORE.storeName);
                         }
                     };
 
                     request.onsuccess = function(event) {
+                        // Resolve with the database object
                         resolve(event.target.result);
                     };
 
                     request.onerror = function(event) {
-                        console.error("IndexedDB Error:", event.target.error);
+                        console.error("IndexedDB Open Error:", event.target.error);
                         reject(event.target.error);
                     };
                 });
             },
 
+            /**
+             * Retrieves an item (credentials object) from the store.
+             * @returns {Promise<Object|null>} The stored object or null if not found/error.
+             */
             getItem: async function() {
                 try {
                     const db = await this._getDB();
                     return new Promise((resolve) => {
+                        // Use a read-only transaction
                         const transaction = db.transaction([this.storeName], 'readonly');
                         const store = transaction.objectStore(this.storeName);
+                        // Get the item by its fixed key
                         const request = store.get(this.key);
                         
-                        request.onsuccess = () => resolve(request.result);
+                        request.onsuccess = () => resolve(request.result || null); // Return null if result is undefined
                         request.onerror = () => resolve(null); // Return null on error
                     });
                 } catch (e) {
@@ -546,47 +564,67 @@
                 }
             },
 
+            /**
+             * Stores an item (credentials object) in the store.
+             * @param {Object} value The object to store (username/password).
+             * @returns {Promise<void>}
+             */
             setItem: async function(value) {
                 try {
                     const db = await this._getDB();
                     return new Promise((resolve, reject) => {
+                        // Use a read-write transaction
                         const transaction = db.transaction([this.storeName], 'readwrite');
                         const store = transaction.objectStore(this.storeName);
+                        // Put (insert/update) the value with the fixed key
                         const request = store.put(value, this.key);
 
                         request.onsuccess = () => resolve();
-                        request.onerror = (e) => reject(e);
+                        request.onerror = (e) => {
+                            console.error("IDB setItem request error:", e.target.error);
+                            reject(e.target.error);
+                        };
+                        transaction.oncomplete = () => resolve(); // Transaction successful
+                        transaction.onerror = (e) => {
+                            console.error("IDB setItem transaction error:", e.target.error);
+                            reject(e.target.error);
+                        };
                     });
                 } catch (e) {
                     console.error("IDB setItem failed:", e);
                 }
             },
 
+            /**
+             * Removes the stored item (credentials object) from the store.
+             * @returns {Promise<void>}
+             */
             removeItem: async function() {
                 try {
                     const db = await this._getDB();
                     return new Promise((resolve, reject) => {
+                        // Use a read-write transaction
                         const transaction = db.transaction([this.storeName], 'readwrite');
                         const store = transaction.objectStore(this.storeName);
+                        // Delete the item by its fixed key
                         const request = store.delete(this.key);
                         
                         request.onsuccess = () => resolve();
-                        request.onerror = (e) => reject(e);
+                        request.onerror = (e) => {
+                            console.error("IDB removeItem request error:", e.target.error);
+                            reject(e.target.error);
+                        };
+                        transaction.oncomplete = () => resolve(); // Transaction successful
+                        transaction.onerror = (e) => {
+                            console.error("IDB removeItem transaction error:", e.target.error);
+                            reject(e.target.error);
+                        };
                     });
                 } catch (e) {
                     console.error("IDB removeItem failed:", e);
                 }
             }
         };
-
-
-        // NEW: Cross-Tab Session Synchronization
-        // NOTE: IndexedDB changes do not automatically trigger the 'storage' event like localStorage. 
-        // A simple cross-tab sync mechanism cannot be implemented without a dedicated broadcast channel/polling setup, 
-        // which is beyond a simple substitution. I will remove the logic that relies on 'storage' event.
-        // The checkAndRestoreSession() on initial load will be the main sync point.
-        // function handleCrossTabLogin(event) { /* ... removed ... */ }
-        // window.addEventListener('storage', handleCrossTabLogin);
 
 
         // NEW FUNCTION: Toggle Password Visibility
@@ -638,8 +676,6 @@
                                 hideBuffer();
                                 // IMPORTANT: Apps Script native response is already parsed (or can be treated as string).
                                 // But since Code.gs returns JSON string, we must parse it here.
-                                // If the return type were set to CONTENT, the parsing would be different.
-                                // Stick to the original for consistency.
                                 try {
                                     resolve(JSON.parse(response));
                                 } catch (e) {
@@ -650,6 +686,8 @@
                                 hideBuffer();
                                 // Use custom modal/alert replacement instead of native alert()
                                 console.error("API Error: ", error);
+                                // Using a standard alert here as a modal replacement is complex,
+                                // but for a direct fix of the provided code, I will use alert().
                                 alert("API Error: " + error);
                                 reject(error);
                             })
@@ -671,7 +709,7 @@
                     hideBuffer();
                     // Use custom modal/alert replacement instead of native alert()
                     console.error("CRITICAL ERROR: Database Not Connected!");
-                    alert("CRITICAL ERROR: Database Not Connected!\n\nTo fix this:\n1. Deploy 'Code.gs' as a Web App.\n2. Paste the Web App URL into the 'WEB_APP_URL' variable in index.html (Line ~360).");
+                    alert("CRITICAL ERROR: Database Not Connected!\n\nTo fix this:\n1. Deploy 'Code.gs' as a Web App.\n2. Paste the Web App URL into the 'WEB_APP_URL' variable in index.html.");
                     throw new Error("Database not connected");
                 }
             } catch (e) {
@@ -698,7 +736,7 @@
             }
         }
 
-        // --- Auth & User Management (MODIFIED FOR INDEXEDDB) ---
+        // --- Auth & User Management (UPDATED FOR INDEXEDDB) ---
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -709,7 +747,7 @@
                 const res = await callAPI('login', { username, password });
                 if (res.status === 'success') {
                     currentUser = res.user;
-                    // MODIFIED: Save credentials to IndexedDB for silent re-login
+                    // !!! INDEXEDDB: Save credentials for silent re-login
                     savedCredentials = { username, password };
                     await IDB_STORE.setItem(savedCredentials);
                     initDashboard();
@@ -744,7 +782,7 @@
 
         async function logout() {
             currentUser = null;
-            // MODIFIED: Clear credentials from IndexedDB on manual logout
+            // !!! INDEXEDDB: Clear credentials from IndexedDB on manual logout
             await IDB_STORE.removeItem();
             savedCredentials = null;
 
@@ -754,7 +792,7 @@
             currentPosition = null; // Clear position on logout
         }
 
-        // NEW FUNCTION: Handle Password Change (MODIFIED FOR INDEXEDDB)
+        // UPDATED FUNCTION: Handle Password Change (UPDATED FOR INDEXEDDB)
         async function handleChangePassword(e) {
             e.preventDefault();
             const newPassword = document.getElementById('new-password').value;
@@ -782,7 +820,8 @@
                 // This ensures the next silent re-login attempt uses the NEW password.
                 if (savedCredentials) {
                     savedCredentials.password = newPassword;
-                    await IDB_STORE.setItem(savedCredentials); // MODIFIED: Update IDB
+                    // !!! INDEXEDDB: Update IDB with new password
+                    await IDB_STORE.setItem(savedCredentials); 
                 }
 
             } else {
@@ -791,14 +830,14 @@
         }
 
 
-        // NEW FUNCTION: Check for saved credentials and attempt silent login (MODIFIED FOR INDEXEDDB)
+        // UPDATED FUNCTION: Check for saved credentials and attempt silent login (UPDATED FOR INDEXEDDB)
         async function checkAndRestoreSession() {
             // 1. If currentUser is already set, we're already logged in (e.g., after initial manual login)
             if (currentUser) {
                 return initDashboard();
             }
             
-            // 2. MODIFIED: Retrieve credentials from IndexedDB
+            // 2. !!! INDEXEDDB: Retrieve credentials from IndexedDB
             savedCredentials = await IDB_STORE.getItem();
 
             // 3. Check for saved credentials for silent re-login
@@ -816,7 +855,8 @@
                 } else {
                     // Password mismatch or user deleted
                     alert("Your session expired or your credentials have been changed. Please log in again.");
-                    await IDB_STORE.removeItem(); // MODIFIED: Invalidate stale credentials in IDB
+                    // !!! INDEXEDDB: Invalidate stale credentials in IDB
+                    await IDB_STORE.removeItem(); 
                     savedCredentials = null;
                     // Reset the form after failure to clear the pre-filled username (for security)
                     document.getElementById('login-form').reset(); 
@@ -1339,8 +1379,7 @@
 
             if (studentIds.length === 0) return alert("Please select students to mark attendance.");
 
-            // Use custom modal/alert replacement instead of native confirm()
-            // Using window.confirm as a fallback for the sake of completeness, but recommend replacing with custom modal.
+            // Using window.confirm as a temporary modal replacement for the sake of completeness
             if (!window.confirm(`Are you sure you want to mark ${studentIds.length} student(s) as ${status}?`)) return;
 
             const res = await callAPI('markStudentAttendance', { studentIds, status });
