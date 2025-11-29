@@ -2,7 +2,7 @@
     "name": "Creatix Institute Management System",
     "short_name": "Creatix ",
     "description": "Institute management system for staff and students.",
-    "start_url": "/",
+    "start_url": "https://muranidiya-arch.github.io/creatix-app/",
     "display": "standalone",
     "orientation": "portrait",
     "background_color": "#0f172a",
