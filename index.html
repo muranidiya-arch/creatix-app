@@ -494,31 +494,99 @@
         window.allStudentsData = [];
         
         // NEW: Placeholder for silent login credentials loaded from Local Storage
-        let savedCredentials = JSON.parse(localStorage.getItem('cimsCreds')) || null;
+        // MODIFIED: savedCredentials is now updated asynchronously when IDB read completes.
+        let savedCredentials = null; 
 
         // --- Configuration ---
         // REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL FOR LOCAL TESTING
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwnRo9Kr08wSrphW-47eBY7GTPSzDIptOw1Pk5fmwdB7OOmlqDFW2Q1vcELYW2xwTuCFQ/exec";
+        
+        // --- IndexedDB Wrapper for key-value storage (replaces localStorage) ---
+        const IDB_STORE = {
+            dbName: 'CIMS_DB',
+            storeName: 'sessionStore',
+            key: 'cimsCreds', // Key to store the credentials object
+
+            _getDB: function() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(this.dbName, 1);
+
+                    request.onupgradeneeded = function(event) {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains(IDB_STORE.storeName)) {
+                            db.createObjectStore(IDB_STORE.storeName);
+                        }
+                    };
+
+                    request.onsuccess = function(event) {
+                        resolve(event.target.result);
+                    };
+
+                    request.onerror = function(event) {
+                        console.error("IndexedDB Error:", event.target.error);
+                        reject(event.target.error);
+                    };
+                });
+            },
+
+            getItem: async function() {
+                try {
+                    const db = await this._getDB();
+                    return new Promise((resolve) => {
+                        const transaction = db.transaction([this.storeName], 'readonly');
+                        const store = transaction.objectStore(this.storeName);
+                        const request = store.get(this.key);
+                        
+                        request.onsuccess = () => resolve(request.result);
+                        request.onerror = () => resolve(null); // Return null on error
+                    });
+                } catch (e) {
+                    console.error("IDB getItem failed:", e);
+                    return null;
+                }
+            },
+
+            setItem: async function(value) {
+                try {
+                    const db = await this._getDB();
+                    return new Promise((resolve, reject) => {
+                        const transaction = db.transaction([this.storeName], 'readwrite');
+                        const store = transaction.objectStore(this.storeName);
+                        const request = store.put(value, this.key);
+
+                        request.onsuccess = () => resolve();
+                        request.onerror = (e) => reject(e);
+                    });
+                } catch (e) {
+                    console.error("IDB setItem failed:", e);
+                }
+            },
+
+            removeItem: async function() {
+                try {
+                    const db = await this._getDB();
+                    return new Promise((resolve, reject) => {
+                        const transaction = db.transaction([this.storeName], 'readwrite');
+                        const store = transaction.objectStore(this.storeName);
+                        const request = store.delete(this.key);
+                        
+                        request.onsuccess = () => resolve();
+                        request.onerror = (e) => reject(e);
+                    });
+                } catch (e) {
+                    console.error("IDB removeItem failed:", e);
+                }
+            }
+        };
+
 
         // NEW: Cross-Tab Session Synchronization
-        function handleCrossTabLogin(event) {
-            // Only care about changes to our saved credentials key in Local Storage
-            if (event.key === 'cimsCreds' && event.newValue !== event.oldValue) {
-                // If a change occurs in another tab, force a page reload to re-run the 
-                // checkAndRestoreSession() logic and synchronize the current tab.
-                if (event.newValue === null) {
-                    // Logout triggered in another tab
-                    alert("You were logged out in another tab.");
-                } else if (event.newValue !== null && currentUser === null) {
-                    // Login triggered in another tab
-                    // Check if current user is logged in, if not, we must reload to perform silent login
-                    alert("Session detected in another tab. Syncing...");
-                }
-                // Force reload to sync session state with the last action taken in any tab
-                window.location.reload(); 
-            }
-        }
-        window.addEventListener('storage', handleCrossTabLogin);
+        // NOTE: IndexedDB changes do not automatically trigger the 'storage' event like localStorage. 
+        // A simple cross-tab sync mechanism cannot be implemented without a dedicated broadcast channel/polling setup, 
+        // which is beyond a simple substitution. I will remove the logic that relies on 'storage' event.
+        // The checkAndRestoreSession() on initial load will be the main sync point.
+        // function handleCrossTabLogin(event) { /* ... removed ... */ }
+        // window.addEventListener('storage', handleCrossTabLogin);
 
 
         // NEW FUNCTION: Toggle Password Visibility
@@ -630,7 +698,7 @@
             }
         }
 
-        // --- Auth & User Management ---
+        // --- Auth & User Management (MODIFIED FOR INDEXEDDB) ---
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -641,9 +709,9 @@
                 const res = await callAPI('login', { username, password });
                 if (res.status === 'success') {
                     currentUser = res.user;
-                    // NEW: Save credentials to Local Storage for silent re-login
+                    // MODIFIED: Save credentials to IndexedDB for silent re-login
                     savedCredentials = { username, password };
-                    localStorage.setItem('cimsCreds', JSON.stringify(savedCredentials));
+                    await IDB_STORE.setItem(savedCredentials);
                     initDashboard();
                 } else {
                     // Use custom modal/alert replacement instead of native alert()
@@ -674,10 +742,10 @@
             if (role === 'boss') showTab('boss', 'staff');
         }
 
-        function logout() {
+        async function logout() {
             currentUser = null;
-            // NEW: Clear credentials from Local Storage on manual logout
-            localStorage.removeItem('cimsCreds');
+            // MODIFIED: Clear credentials from IndexedDB on manual logout
+            await IDB_STORE.removeItem();
             savedCredentials = null;
 
             document.getElementById('app-container').classList.add('hidden');
@@ -686,7 +754,7 @@
             currentPosition = null; // Clear position on logout
         }
 
-        // NEW FUNCTION: Handle Password Change
+        // NEW FUNCTION: Handle Password Change (MODIFIED FOR INDEXEDDB)
         async function handleChangePassword(e) {
             e.preventDefault();
             const newPassword = document.getElementById('new-password').value;
@@ -714,7 +782,7 @@
                 // This ensures the next silent re-login attempt uses the NEW password.
                 if (savedCredentials) {
                     savedCredentials.password = newPassword;
-                    localStorage.setItem('cimsCreds', JSON.stringify(savedCredentials));
+                    await IDB_STORE.setItem(savedCredentials); // MODIFIED: Update IDB
                 }
 
             } else {
@@ -723,14 +791,17 @@
         }
 
 
-        // NEW FUNCTION: Check for saved credentials and attempt silent login
+        // NEW FUNCTION: Check for saved credentials and attempt silent login (MODIFIED FOR INDEXEDDB)
         async function checkAndRestoreSession() {
             // 1. If currentUser is already set, we're already logged in (e.g., after initial manual login)
             if (currentUser) {
                 return initDashboard();
             }
             
-            // 2. Check for saved credentials for silent re-login
+            // 2. MODIFIED: Retrieve credentials from IndexedDB
+            savedCredentials = await IDB_STORE.getItem();
+
+            // 3. Check for saved credentials for silent re-login
             if (savedCredentials) {
                 // Pre-fill the login form for visual quick-sync, though submission is silent
                 document.getElementById('username').value = savedCredentials.username;
@@ -743,9 +814,9 @@
                     currentUser = res.user;
                     initDashboard();
                 } else {
-                    // Password mismatch or user deleted (The core requirement is met here!)
+                    // Password mismatch or user deleted
                     alert("Your session expired or your credentials have been changed. Please log in again.");
-                    localStorage.removeItem('cimsCreds'); // Invalidate stale credentials
+                    await IDB_STORE.removeItem(); // MODIFIED: Invalidate stale credentials in IDB
                     savedCredentials = null;
                     // Reset the form after failure to clear the pre-filled username (for security)
                     document.getElementById('login-form').reset(); 
