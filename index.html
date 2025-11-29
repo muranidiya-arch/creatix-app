@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Creatix Institute Management System</title>
     <!-- PWA: Link Manifest File -->
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="./manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom Animations */
@@ -478,7 +478,7 @@
         // PWA: Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
+                navigator.serviceWorker.register('./service-worker.js')
                     .then(reg => {
                         console.log('Service Worker registered successfully: ', reg);
                     })
@@ -1235,3 +1235,4 @@
 </body>
 
 </html>
+
