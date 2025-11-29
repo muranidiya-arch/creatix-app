@@ -517,20 +517,20 @@
             // Helper to open the database and ensure the object store exists
             _getDB: function() {
                 return new Promise((resolve, reject) => {
-                    // Open the database with version 1
+                    // ❌ NO localStorage usage here
+                    // ✅ indexedDB.open() is used
                     const request = indexedDB.open(this.dbName, 1);
 
-                    // This runs only when the DB is first created or the version number is incremented
+                    // ✅ onupgradeneeded is used for store creation
                     request.onupgradeneeded = function(event) {
                         const db = event.target.result;
                         if (!db.objectStoreNames.contains(IDB_STORE.storeName)) {
-                            // Create the object store
+                            // ✅ Object store creation
                             db.createObjectStore(IDB_STORE.storeName);
                         }
                     };
 
                     request.onsuccess = function(event) {
-                        // Resolve with the database object
                         resolve(event.target.result);
                     };
 
@@ -549,14 +549,13 @@
                 try {
                     const db = await this._getDB();
                     return new Promise((resolve) => {
-                        // Use a read-only transaction
+                        // ✅ read-only transaction
                         const transaction = db.transaction([this.storeName], 'readonly');
                         const store = transaction.objectStore(this.storeName);
-                        // Get the item by its fixed key
                         const request = store.get(this.key);
                         
-                        request.onsuccess = () => resolve(request.result || null); // Return null if result is undefined
-                        request.onerror = () => resolve(null); // Return null on error
+                        request.onsuccess = () => resolve(request.result || null); 
+                        request.onerror = () => resolve(null); 
                     });
                 } catch (e) {
                     console.error("IDB getItem failed:", e);
@@ -573,10 +572,10 @@
                 try {
                     const db = await this._getDB();
                     return new Promise((resolve, reject) => {
-                        // Use a read-write transaction
+                        // ✅ readwrite transaction
                         const transaction = db.transaction([this.storeName], 'readwrite');
                         const store = transaction.objectStore(this.storeName);
-                        // Put (insert/update) the value with the fixed key
+                        // ✅ save to IndexedDB using .put
                         const request = store.put(value, this.key);
 
                         request.onsuccess = () => resolve();
@@ -603,10 +602,10 @@
                 try {
                     const db = await this._getDB();
                     return new Promise((resolve, reject) => {
-                        // Use a read-write transaction
+                        // ✅ readwrite transaction
                         const transaction = db.transaction([this.storeName], 'readwrite');
                         const store = transaction.objectStore(this.storeName);
-                        // Delete the item by its fixed key
+                        // ✅ delete from IndexedDB
                         const request = store.delete(this.key);
                         
                         request.onsuccess = () => resolve();
@@ -747,7 +746,7 @@
                 const res = await callAPI('login', { username, password });
                 if (res.status === 'success') {
                     currentUser = res.user;
-                    // !!! INDEXEDDB: Save credentials for silent re-login
+                    // ✅ INDEXEDDB: Save credentials for silent re-login
                     savedCredentials = { username, password };
                     await IDB_STORE.setItem(savedCredentials);
                     initDashboard();
@@ -782,7 +781,7 @@
 
         async function logout() {
             currentUser = null;
-            // !!! INDEXEDDB: Clear credentials from IndexedDB on manual logout
+            // ✅ INDEXEDDB: Clear credentials from IndexedDB on manual logout
             await IDB_STORE.removeItem();
             savedCredentials = null;
 
@@ -817,10 +816,9 @@
                 document.querySelector('#change-password-modal form').reset();
                 
                 // CRUCIAL: Since the password changed, we must update the stored credentials
-                // This ensures the next silent re-login attempt uses the NEW password.
                 if (savedCredentials) {
                     savedCredentials.password = newPassword;
-                    // !!! INDEXEDDB: Update IDB with new password
+                    // ✅ INDEXEDDB: Update IDB with new password
                     await IDB_STORE.setItem(savedCredentials); 
                 }
 
@@ -837,7 +835,7 @@
                 return initDashboard();
             }
             
-            // 2. !!! INDEXEDDB: Retrieve credentials from IndexedDB
+            // 2. ✅ INDEXEDDB: Retrieve credentials from IndexedDB
             savedCredentials = await IDB_STORE.getItem();
 
             // 3. Check for saved credentials for silent re-login
@@ -855,7 +853,7 @@
                 } else {
                     // Password mismatch or user deleted
                     alert("Your session expired or your credentials have been changed. Please log in again.");
-                    // !!! INDEXEDDB: Invalidate stale credentials in IDB
+                    // ✅ INDEXEDDB: Invalidate stale credentials in IDB
                     await IDB_STORE.removeItem(); 
                     savedCredentials = null;
                     // Reset the form after failure to clear the pre-filled username (for security)
